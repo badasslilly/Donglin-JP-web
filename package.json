@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@strapi/plugin-graphql": "^5.15.1",
+    "swiper": "^11.2.8"
+  }
+}

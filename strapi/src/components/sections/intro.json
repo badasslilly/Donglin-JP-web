@@ -1,0 +1,10 @@
+{
+  "collectionName": "components_intro",
+  "info": { "displayName": "Intro" },
+  "attributes": {
+    "crest": { "type": "media", "multiple": false },
+    "kanji_vertical": { "type": "media", "multiple": false },
+    "title": { "type": "string", "required": true },
+    "description": { "type": "richtext", "required": true }
+  }
+}

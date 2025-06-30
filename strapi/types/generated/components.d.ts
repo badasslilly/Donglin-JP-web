@@ -1,77 +1,73 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
-export interface BlocksHeroSection extends Struct.ComponentSchema {
-  collectionName: 'components_blocks_hero_sections';
+export interface SectionsIntro extends Struct.ComponentSchema {
+  collectionName: 'components_intro';
   info: {
-    displayName: 'Hero Section';
+    displayName: 'Intro';
   };
   attributes: {
-    cta: Schema.Attribute.Component<'elements.link', false>;
-    heading: Schema.Attribute.String;
-    image: Schema.Attribute.Media<'images'>;
-    logo: Schema.Attribute.Component<'elements.logo', false>;
-    theme: Schema.Attribute.Enumeration<['turquoise', 'orange']>;
+    crest: Schema.Attribute.Media;
+    description: Schema.Attribute.RichText & Schema.Attribute.Required;
+    kanji_vertical: Schema.Attribute.Media;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
   };
 }
 
-export interface BlocksInfo extends Struct.ComponentSchema {
-  collectionName: 'components_blocks_infos';
+export interface SectionsPromo extends Struct.ComponentSchema {
+  collectionName: 'components_promo';
   info: {
-    displayName: 'Info';
+    displayName: 'Promo Section';
   };
   attributes: {
-    content: Schema.Attribute.RichText;
-    cta: Schema.Attribute.Component<'elements.link', true>;
-    headline: Schema.Attribute.String;
-    image: Schema.Attribute.Media<'images'>;
-    reversed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    theme: Schema.Attribute.Enumeration<['turquoise', 'orange']>;
+    body: Schema.Attribute.RichText & Schema.Attribute.Required;
+    cta_label: Schema.Attribute.String;
+    cta_link: Schema.Attribute.String;
+    heading: Schema.Attribute.String & Schema.Attribute.Required;
+    images: Schema.Attribute.Media<undefined, true>;
   };
 }
 
-export interface ElementsLink extends Struct.ComponentSchema {
-  collectionName: 'components_elements_links';
+export interface SectionsSlide extends Struct.ComponentSchema {
+  collectionName: 'components_slide';
+  info: {
+    displayName: 'Slide';
+  };
+  attributes: {
+    alt: Schema.Attribute.String;
+    image: Schema.Attribute.Media & Schema.Attribute.Required;
+  };
+}
+
+export interface SharedLink extends Struct.ComponentSchema {
+  collectionName: 'components_shared_link';
   info: {
     displayName: 'Link';
   };
   attributes: {
-    href: Schema.Attribute.String;
-    isExternal: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    text: Schema.Attribute.String;
+    href: Schema.Attribute.String & Schema.Attribute.Required;
+    label: Schema.Attribute.String & Schema.Attribute.Required;
   };
 }
 
-export interface ElementsLogo extends Struct.ComponentSchema {
-  collectionName: 'components_elements_logos';
+export interface SharedSocialLink extends Struct.ComponentSchema {
+  collectionName: 'components_social_link';
   info: {
-    displayName: 'Logo';
+    displayName: 'Social Link';
   };
   attributes: {
-    image: Schema.Attribute.Media<'images'>;
-    logoTitle: Schema.Attribute.String;
-  };
-}
-
-export interface LayoutHeader extends Struct.ComponentSchema {
-  collectionName: 'components_layout_headers';
-  info: {
-    displayName: 'Header';
-  };
-  attributes: {
-    cta: Schema.Attribute.Component<'elements.link', false>;
-    logo: Schema.Attribute.Component<'elements.logo', false>;
-    navigation: Schema.Attribute.Component<'elements.link', true>;
+    platform: Schema.Attribute.Enumeration<['facebook', 'instagram', 'x']>;
+    url: Schema.Attribute.String;
   };
 }
 
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
-      'blocks.hero-section': BlocksHeroSection;
-      'blocks.info': BlocksInfo;
-      'elements.link': ElementsLink;
-      'elements.logo': ElementsLogo;
-      'layout.header': LayoutHeader;
+      'sections.intro': SectionsIntro;
+      'sections.promo': SectionsPromo;
+      'sections.slide': SectionsSlide;
+      'shared.link': SharedLink;
+      'shared.social-link': SharedSocialLink;
     }
   }
 }

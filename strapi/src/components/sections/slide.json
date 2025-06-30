@@ -1,0 +1,8 @@
+{
+  "collectionName": "components_slide",
+  "info": { "displayName": "Slide" },
+  "attributes": {
+    "image": { "type": "media", "required": true, "multiple": false },
+    "alt": { "type": "string" }
+  }
+}

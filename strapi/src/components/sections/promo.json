@@ -1,0 +1,11 @@
+{
+  "collectionName": "components_promo",
+  "info": { "displayName": "Promo Section" },
+  "attributes": {
+    "heading": { "type": "string", "required": true },
+    "body": { "type": "richtext", "required": true },
+    "images": { "type": "media", "multiple": true },
+    "cta_label": { "type": "string" },
+    "cta_link": { "type": "string" }
+  }
+}

@@ -1,0 +1,6 @@
+// src/lib/utils.ts
+import { clsx } from "clsx";
+
+export function cn(...inputs: (string | false | null | undefined)[]) {
+  return clsx(inputs);
+}
