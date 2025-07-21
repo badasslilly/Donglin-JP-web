@@ -9,13 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@strapi/blocks-react-renderer": "^1.0.2",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
     "framer-motion": "^12.18.1",
     "lucide-react": "^0.523.0",
     "next": "15.3.3",
+    "next-intl": "^4.3.4",
     "qs": "^6.14.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "strapi-v5-plugin-populate-deep": "^4.0.5",
     "swiper": "^11.2.8"
   },
   "devDependencies": {
@@ -27,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "husky": "^9.1.7",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

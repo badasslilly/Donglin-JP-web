@@ -53,7 +53,7 @@ export default function HeroHeader({
       {/* Framed title block */}
       <div className="relative z-10 flex h-full items-center justify-center">
         <div className="border border-white/60 px-12 py-8 text-center backdrop-blur-sm">
-          <h1 className="mb-3 font-hannari text-3xl tracking-widest text-white sm:text-4xl md:text-5xl">
+          <h1 className="mb-3 font-hannari text-3xl tracking-widest text-white sm:text-4xl md:text-4xl">
             {title}
           </h1>
           {subtitle && (

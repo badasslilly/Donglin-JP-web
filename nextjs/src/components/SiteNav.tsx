@@ -1,174 +1,229 @@
-/** @format */
+'use client';
 
-'use client'
+import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
-import clsx from 'clsx'
-import localFont from 'next/font/local'
-import LanguageSwitcher from './LanguageSwitcher'
-import Image from 'next/image'
+import Image from 'next/image';
+import { Menu, X } from 'lucide-react';
+import clsx from 'clsx';
+import LanguageSwitcher from './LanguageSwitcher';
+import { hannariMinchoFont } from '@/styles/fonts';
+import Link from 'next/link';
 
-/* ------------------------------------------------------------------ */
-/*  VerticalSiteNav – home rail & sub‑page bar                        */
-/* ------------------------------------------------------------------ */
-const hannari = localFont({ src: '../app/fonts/HannariMincho-Regular.woff2' })
+export type Locale = 'ja' | 'en';
+export interface NavItem {
+  label: string;
+  href: string;
+  isExternal?: boolean | null;
+}
 
-const NAV = [
-  { href: '/', label: 'トップ' },
-  { href: '/about', label: '東林寺について' },
-  { href: '/highlights', label: '見どころ' },
-  { href: '/events', label: '行事・体験' },
-  { href: '/offering', label: '授与品一覧' },
-  { href: '/news', label: 'お知らせ' },
-  { href: '/contact', label: 'お問い合わせ' },
-]
+export default function SiteNav({
+  locale,
+  items,
+  logoUrl
+}: {
+  locale: Locale;
+  items: NavItem[];
+  logoUrl?: string | null;
+}) {
+  const pathname = usePathname();
+  const home = pathname === `/${locale}`;
 
-export default function SiteNav() {
-  const pathname = usePathname()
+  /* ----- mobile drawer state (only JS we keep) ------------------- */
+  const [open, setOpen] = useState(false);
 
-  /* breakpoint */
-  const [desktop, setDesktop] = useState(false)
-  useEffect(() => {
-    if (typeof window === 'undefined') return // SSR guard
-    const mq = matchMedia('(min-width:1024px)')
-    const handler = () => setDesktop(mq.matches)
-    handler()
-    mq.addEventListener('change', handler)
-    return () => {
-      mq.removeEventListener('change', handler)
-    }
-  }, [])
+  /* ---------------- MOBILE (lg:hidden) --------------------------- */
+  const mobileNav = (
+    <>
+      <button
+        aria-label="メニュー"
+        onClick={() => setOpen(!open)}
+        className="fixed right-4 top-4 z-[100] flex h-10 w-10 items-center justify-center rounded-full bg-gray-900/80 text-white lg:hidden"
+      >
+        {open ? <X size={20} /> : <Menu size={20} />}
+      </button>
 
-  const mobile = !desktop
-  const home = pathname === '/'
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
 
-  /* sidebar (mobile) */
-  const [open, setOpen] = useState(false)
-  useEffect(() => {
-    if (mobile) {
-      setOpen(false)
-    }
-  }, [pathname, mobile])
-
-  /* ─────────────── Mobile hamburger & sidebar ─────────────── */
-  if (mobile) {
-    return (
-      <>
-        <button
-          aria-label='メニュー'
-          onClick={() => setOpen((o) => !o)}
-          className='fixed right-4 top-4 z-[100] flex h-10 w-10 items-center justify-center rounded-full bg-gray-900/80 text-white'
-        >
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
-
-        {open && (
-          <div
-            className='fixed inset-0 z-40 bg-black/60'
-            onClick={() => setOpen(false)}
-          />
+      <aside
+        className={clsx(
+          'fixed inset-y-0 right-0 z-50 w-72 max-w-full bg-stone-50 shadow-xl transition-transform duration-300 lg:hidden',
+          open ? 'translate-x-0' : 'translate-x-full'
         )}
-
-        <aside
-          className={clsx(
-            'fixed inset-y-0 right-0 z-50 w-72 max-w-full bg-stone-50 shadow-xl transition-transform duration-300',
-            open ? 'translate-x-0' : 'translate-x-full'
-          )}
-          aria-label='メインナビゲーション'
+        aria-label="モバイルメニュー"
+      >
+        <div
+          className={`flex h-full flex-col gap-10 px-8 py-12 font-semibold ${hannariMinchoFont.className}`}
         >
-          <div className='flex h-full flex-col gap-10 px-8 py-12'>
-            <ul className='flex flex-col gap-6 font-medium text-gray-900'>
-              {NAV.map((n) => (
-                <li key={n.href}>
+          <ul className="flex flex-col gap-6 text-gray-900">
+            {items.map((n) => (
+              <li key={n.href}>
+                {n.isExternal ? (
+                  <a
+                    href={n.href}
+                    target="_blank"
+                    rel="noopener"
+                    className="block text-lg"
+                    onClick={() => setOpen(false)}
+                  >
+                    {n.label}
+                  </a>
+                ) : (
                   <Link
                     href={n.href}
+                    locale={locale}
+                    className="block text-lg"
                     onClick={() => setOpen(false)}
-                    className='block text-lg'
                   >
                     {n.label}
                   </Link>
-                </li>
-              ))}
-            </ul>
-            <LanguageSwitcher lang='ja' />
-          </div>
-        </aside>
-      </>
-    )
-  }
+                )}
+              </li>
+            ))}
+          </ul>
+          <LanguageSwitcher />
+        </div>
+      </aside>
+    </>
+  );
 
-  /* ─────────────── Desktop HOME: vertical rail ────────────── */
-  if (home && desktop) {
-    return (
-      <nav
-        className={clsx(
-          'fixed right-14 top-20 z-30 pointer-events-none',
-          hannari.className
-        )}
-        aria-label='メインナビゲーション（縦書き）'
-      >
-        <ul className='flex flex-col gap-8 text-[1.25rem] tracking-widest text-black [writing-mode:vertical-rl] mix-blend-difference'>
-          {NAV.map((n) => (
-            <li key={n.href} className='leading-none'>
+  /* ---------------- DESKTOP HOME (vertical) ---------------------- */
+  const verticalNav = (
+    <nav
+      className={clsx(
+        'pointer-events-none fixed right-14 top-20 z-30 hidden lg:block',
+        hannariMinchoFont.className
+      )}
+      aria-label="メインナビゲーション（縦書き）"
+    >
+      {/* <ul className="[writing-mode:vertical-rl] mix-blend-difference flex flex-col gap-6 text-[1.25rem] tracking-widest text-black pointer-events-auto"> */}
+      <ul
+  className={clsx(
+    'pointer-events-auto flex flex-col',
+    locale === 'ja'
+      ? '[writing-mode:vertical-rl] gap-6 text-[1.25rem] tracking-widest mix-blend-difference text-black'
+      : [
+          '[writing-mode:vertical-rl]', // keep stacking top-to-bottom
+          'gap-8 text-[1.25rem] tracking-widest'
+        ]
+  )}
+>
+        {items.map((n) => (
+          <li key={n.href} className={clsx(
+            'leading-none'
+          )}>
+            {n.isExternal ? (
+              <a
+                href={n.href}
+                target="_blank"
+                rel="noopener"
+                className="hover:opacity-60"
+              >
+                {n.label}
+              </a>
+            ) : (
               <Link
                 href={n.href}
-                className='pointer-events-auto hover:opacity-60'
+                locale={locale}
+                className="hover:opacity-60"
               >
                 {n.label}
               </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+
+  /* ---------------- DESKTOP SUB-PAGES (horizontal) --------------- */
+  const horizontalNav = (
+    <header className="relative z-20 hidden lg:block">
+      <nav
+        className={clsx(
+          'mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-6 text-base font-semibold',
+          hannariMinchoFont.className
+        )}
+      >
+        {/* left side */}
+        <ul className="flex flex-1 justify-evenly gap-8">
+          {items.slice(0, 3).map((n) => (
+            <li key={n.href}>
+              {n.isExternal ? (
+                <a
+                  href={n.href}
+                  target="_blank"
+                  rel="noopener"
+                  className="hover:opacity-60"
+                >
+                  {n.label}
+                </a>
+              ) : (
+                <Link
+                  href={n.href}
+                  locale={locale}
+                  className="hover:opacity-60"
+                >
+                  {n.label}
+                </Link>
+              )}
+            </li>
+          ))}
+        </ul>
+
+        {/* centre logo */}
+        <Link href="/" locale={locale} className="shrink-0">
+          <Image
+            src={logoUrl || '/logo/logo.png'}
+            alt="Donglin Temple"
+            width={140}
+            height={54}
+            priority
+          />
+        </Link>
+
+        {/* right side */}
+        <ul className="flex flex-1 justify-evenly gap-8">
+          {items.slice(3).map((n) => (
+            <li key={n.href}>
+              {n.isExternal ? (
+                <a
+                  href={n.href}
+                  target="_blank"
+                  rel="noopener"
+                  className="hover:opacity-60"
+                >
+                  {n.label}
+                </a>
+              ) : (
+                <Link
+                  href={n.href}
+                  locale={locale}
+                  className="hover:opacity-60"
+                >
+                  {n.label}
+                </Link>
+              )}
             </li>
           ))}
         </ul>
       </nav>
-    )
-  }
+    </header>
+  );
 
-  /* ─────────────── Desktop sub‑pages: horizontal bar ───────── */
-  if (desktop) {
-    return (
-      <header className="relative z-20">
-        <nav
-          className={clsx(
-            "mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-6 text-base font-semibold",
-            hannari.className
-          )}
-        >
-          {/* left group */}
-          <ul className="flex flex-1 justify-evenly gap-8">
-            {NAV.slice(1, 4).map((n) => (
-              <li key={n.href} className="flex flex-col items-center gap-1">
-                {/* <span className="h-1 w-1 rounded-full bg-black/60" /> */}
-                <Link href={n.href} className="hover:opacity-60">
-                  {n.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+  /* ------- Render all branches with CSS hiding ------------------- */
+  return (
+    <>
+      {/* mobile drawer */}
+      {mobileNav}
 
-          {/* centre logo */}
-          <Link href="/" className="shrink-0">
-            <Image src="/logo/donglin-logo.png" alt="中国・廬山東林寺" width={140} height={54} priority />
-          </Link>
-
-          {/* right group */}
-          <ul className="flex flex-1 justify-evenly gap-8">
-            {NAV.slice(4).map((n) => (
-              <li key={n.href} className="flex flex-col items-center gap-1">
-                {/* <span className="h-1 w-1 rounded-full bg-black/60" /> */}
-                <Link href={n.href} className="hover:opacity-60">
-                  {n.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </header>
-    );
-  }
-
-  /* desktop non‑home fall‑back (shouldn't reach) */
-  return null
+      {/* desktop navs */}
+      {home ? verticalNav : horizontalNav}
+    </>
+  );
 }

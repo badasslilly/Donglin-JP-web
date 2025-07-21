@@ -1,45 +1,46 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import { usePathname, useRouter } from '@/i18n/navigation';
+import {useLocale} from 'next-intl';
 
-export default function LanguageSwitcher({ lang }: { lang: 'ja' | 'en' }) {
-  const pathname = usePathname();            // e.g. /ja/about
-  const other    = lang === 'ja' ? 'en' : 'ja';
-  const href     = pathname.replace(`/${lang}`, `/${other}`);
+
+export default function LanguageSwitcher() {
+  const locale   = useLocale() as 'ja' | 'en';   
+  const router   = useRouter();                  
+  const pathname = usePathname();                
+
+  const other = locale === 'ja' ? 'en' : 'ja';
+
+  function switchLocale() {
+
+    router.replace(pathname, {locale: other});
+  }
 
   return (
     <div className="mt-6 flex gap-4 text-xs font-medium tracking-widest lg:text-sm">
-      {/* JAPANESE */}
-      <Link
-        href={href}
-        className={`
-          flex flex-col items-center uppercase transition hover:opacity-80
-          ${lang === 'ja' ? 'text-black font-bold' : 'text-gray-400'}
-        `}
+      {/* 日本語 */}
+      <button
+        onClick={switchLocale}
+        className={`flex flex-col items-center uppercase transition hover:opacity-80
+          ${locale === 'ja' ? 'text-black font-bold' : 'text-gray-400'}`}
+        aria-label="Switch to Japanese"
       >
         日本語
-        {lang === 'ja' && (
-          <span className="mt-1 block h-2 w-2 rounded-full bg-black" />
-        )}
-      </Link>
+        {locale === 'ja' && <span className="mt-1 block h-2 w-2 rounded-full bg-black" />}
+      </button>
 
-      {/* Divider */}
       <span className="select-none opacity-60 text-gray-500">|</span>
 
-      {/* ENGLISH */}
-      <Link
-        href={href}
-        className={`
-          flex flex-col items-center uppercase transition hover:opacity-80
-          ${lang === 'en' ? 'text-black font-bold' : 'text-gray-400'}
-        `}
+      {/* English */}
+      <button
+        onClick={switchLocale}
+        className={`flex flex-col items-center uppercase transition hover:opacity-80
+          ${locale === 'en' ? 'text-black font-bold' : 'text-gray-400'}`}
+        aria-label="Switch to English"
       >
         English
-        {lang === 'en' && (
-          <span className="mt-1 block h-2 w-2 rounded-full bg-black" />
-        )}
-      </Link>
+        {locale === 'en' && <span className="mt-1 block h-2 w-2 rounded-full bg-black" />}
+      </button>
     </div>
   );
 }

@@ -1,0 +1,39 @@
+{
+  "kind": "singleType",
+  "collectionName": "highlights_pages",
+  "info": {
+    "singularName": "highlights-page",
+    "pluralName": "highlights-pages",
+    "displayName": "Highlights Page"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "header": {
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "sections.hero",
+      "repeatable": false
+    },
+    "tab_bar": {
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "sections.page-tab",
+      "repeatable": true
+    }
+  }
+}

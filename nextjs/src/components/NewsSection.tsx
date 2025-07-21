@@ -38,7 +38,7 @@ export default function NewsSection() {
           <SectionTitle
             jp="新着情報"
             en="News"
-            className="justify-self-center md:justify-self-start"
+            className="justify-self-start"
           />
 
           {/* Right : news list + button */}

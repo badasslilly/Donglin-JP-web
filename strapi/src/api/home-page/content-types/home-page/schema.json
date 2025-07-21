@@ -15,35 +15,53 @@
     }
   },
   "attributes": {
-    "hero_slides": {
-      "type": "component",
+    "About": {
+      "type": "dynamiczone",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
-      "component": "sections.slide",
-      "repeatable": true
+      "components": [
+        "sections.section-title",
+        "sections.text-with-img",
+        "sections.button"
+      ]
     },
-    "intro": {
-      "type": "component",
+    "News": {
+      "type": "dynamiczone",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
-      "component": "sections.intro",
-      "repeatable": false
+      "components": [
+        "sections.section-title"
+      ]
     },
-    "promos": {
-      "type": "component",
+    "handwritng_logo_v": {
+      "type": "media",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
-      "component": "sections.promo",
-      "repeatable": true
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "avatar": {
+      "type": "media",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
     }
   }
 }

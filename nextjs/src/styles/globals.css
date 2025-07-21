@@ -24,3 +24,18 @@ body {
 }
 
 .sectionSpacer { margin-top: 6rem; }
+
+/* timeline rail – solid line connecting dots */
+.timeline-rail::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0.75rem;
+  bottom: 0;
+  border-left: 1px solid #a3a3a3;         /* gray-500 */
+}
+
+.event-row:hover {
+  background-color: #f8f6fd;              /* light lavender (matches ref.) */
+}
+

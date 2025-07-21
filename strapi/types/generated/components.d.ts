@@ -1,29 +1,59 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
-export interface SectionsIntro extends Struct.ComponentSchema {
-  collectionName: 'components_intro';
+export interface BlocksArticle extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_articles';
   info: {
-    displayName: 'Intro';
+    displayName: 'Article';
   };
   attributes: {
-    crest: Schema.Attribute.Media;
-    description: Schema.Attribute.RichText & Schema.Attribute.Required;
-    kanji_vertical: Schema.Attribute.Media;
+    date: Schema.Attribute.Date;
+    details: Schema.Attribute.Blocks;
+    headline: Schema.Attribute.String;
+    media: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+  };
+}
+
+export interface SectionsButton extends Struct.ComponentSchema {
+  collectionName: 'components_sections_buttons';
+  info: {
+    displayName: 'Button';
+  };
+  attributes: {
     title: Schema.Attribute.String & Schema.Attribute.Required;
   };
 }
 
-export interface SectionsPromo extends Struct.ComponentSchema {
-  collectionName: 'components_promo';
+export interface SectionsHero extends Struct.ComponentSchema {
+  collectionName: 'components_sections_heroes';
   info: {
-    displayName: 'Promo Section';
+    displayName: 'Hero';
   };
   attributes: {
-    body: Schema.Attribute.RichText & Schema.Attribute.Required;
-    cta_label: Schema.Attribute.String;
-    cta_link: Schema.Attribute.String;
-    heading: Schema.Attribute.String & Schema.Attribute.Required;
-    images: Schema.Attribute.Media<undefined, true>;
+    bg_image: Schema.Attribute.Media<'images'>;
+    heading: Schema.Attribute.Component<'sections.section-title', false>;
+  };
+}
+
+export interface SectionsPageTab extends Struct.ComponentSchema {
+  collectionName: 'components_sections_page_tabs';
+  info: {
+    displayName: 'Page Tab';
+  };
+  attributes: {
+    href: Schema.Attribute.String;
+    label: Schema.Attribute.String;
+    order: Schema.Attribute.Integer;
+  };
+}
+
+export interface SectionsSectionTitle extends Struct.ComponentSchema {
+  collectionName: 'components_sections_section_titles';
+  info: {
+    displayName: 'Section Title';
+  };
+  attributes: {
+    title_en: Schema.Attribute.String & Schema.Attribute.Required;
+    title_ja: Schema.Attribute.String & Schema.Attribute.Required;
   };
 }
 
@@ -38,6 +68,29 @@ export interface SectionsSlide extends Struct.ComponentSchema {
   };
 }
 
+export interface SectionsTextWithImg extends Struct.ComponentSchema {
+  collectionName: 'components_sections_text_with_imgs';
+  info: {
+    displayName: 'Text Block';
+  };
+  attributes: {
+    headline: Schema.Attribute.String;
+    image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    intro: Schema.Attribute.Blocks & Schema.Attribute.Required;
+  };
+}
+
+export interface SharedCategory extends Struct.ComponentSchema {
+  collectionName: 'components_shared_categories';
+  info: {
+    displayName: 'Category';
+  };
+  attributes: {
+    content: Schema.Attribute.Component<'sections.text-with-img', true>;
+    headline: Schema.Attribute.String;
+  };
+}
+
 export interface SharedLink extends Struct.ComponentSchema {
   collectionName: 'components_shared_link';
   info: {
@@ -45,6 +98,7 @@ export interface SharedLink extends Struct.ComponentSchema {
   };
   attributes: {
     href: Schema.Attribute.String & Schema.Attribute.Required;
+    isExternal: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     label: Schema.Attribute.String & Schema.Attribute.Required;
   };
 }
@@ -60,14 +114,31 @@ export interface SharedSocialLink extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedTextWithImg extends Struct.ComponentSchema {
+  collectionName: 'components_shared_text_with_imgs';
+  info: {
+    displayName: 'Text with Img';
+  };
+  attributes: {
+    description: Schema.Attribute.Blocks;
+    img: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+  };
+}
+
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
-      'sections.intro': SectionsIntro;
-      'sections.promo': SectionsPromo;
+      'blocks.article': BlocksArticle;
+      'sections.button': SectionsButton;
+      'sections.hero': SectionsHero;
+      'sections.page-tab': SectionsPageTab;
+      'sections.section-title': SectionsSectionTitle;
       'sections.slide': SectionsSlide;
+      'sections.text-with-img': SectionsTextWithImg;
+      'shared.category': SharedCategory;
       'shared.link': SharedLink;
       'shared.social-link': SharedSocialLink;
+      'shared.text-with-img': SharedTextWithImg;
     }
   }
 }

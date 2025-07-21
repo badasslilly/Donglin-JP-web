@@ -1,0 +1,29 @@
+{
+  "kind": "singleType",
+  "collectionName": "pureland_path_pages",
+  "info": {
+    "singularName": "pureland-path-page",
+    "pluralName": "pureland-path-pages",
+    "displayName": "Pureland Path Page"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "section_block": {
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "shared.category",
+      "repeatable": true
+    }
+  }
+}

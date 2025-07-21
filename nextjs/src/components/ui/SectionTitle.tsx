@@ -4,7 +4,7 @@ import clsx from "clsx";
 import localFont from 'next/font/local'
 
 const AiharahudemojikaishoFont = localFont({
-  src: '../../app/fonts/Aiharahudemojikaisho_free305.ttf',
+  src: '../../fonts/Aiharahudemojikaisho_free305.ttf',
 })
 
 interface SectionTitleProps {

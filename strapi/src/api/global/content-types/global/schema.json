@@ -51,6 +51,14 @@
         }
       }
     },
+    "inquiry": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "phone": {
       "type": "string",
       "pluginOptions": {
@@ -61,6 +69,38 @@
     },
     "email": {
       "type": "email",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "handwritng_logo_h": {
+      "type": "media",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "footer_logo": {
+      "type": "media",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "copyright": {
+      "type": "string",
       "pluginOptions": {
         "i18n": {
           "localized": true

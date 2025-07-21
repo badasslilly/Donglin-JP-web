@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_sections_page_tabs",
+  "info": {
+    "displayName": "Page Tab"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "href": {
+      "type": "string"
+    },
+    "order": {
+      "type": "integer"
+    }
+  },
+  "config": {}
+}

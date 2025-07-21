@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_sections_section_titles",
+  "info": {
+    "displayName": "Section Title"
+  },
+  "options": {},
+  "attributes": {
+    "title_ja": {
+      "type": "string",
+      "required": true
+    },
+    "title_en": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "config": {}
+}
