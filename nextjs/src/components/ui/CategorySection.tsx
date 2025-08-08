@@ -117,18 +117,18 @@ export default function CategorySection({ title, slug, people, locale }: Props) 
 
       {/* people grid */}
       {isGridOpen && (
-        <div className='mt-6 grid gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 items-stretch'>
-          {people.map((p) => (
-            <PersonCard 
-              key={p.id}
-              slug={p.slug}
-              name={p.name}
-              brief={p.brief}
-              src={p.src}
-              onSelect={handleSelect}
-            />
-          ))}
-        </div>
+        <div className="mt-6 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {people.map((p) => (
+          <PersonCard
+            key={p.id}
+            slug={p.slug}
+            name={p.name}
+            brief={p.brief}
+            src={p.src}
+            onSelect={handleSelect}
+          />
+        ))}
+      </div>
       )}
 
       {/* lazy-loaded modal */}

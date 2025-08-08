@@ -24,25 +24,23 @@ interface CategoryFlat {
 
 /* put this near the top of people/page.tsx -------------------------------- */
 const byOrderAsc = <
-  T extends { order?: string | number | null; title?: string | null }
+  T extends { order?: string | number | null; title?: string | null },
 >(
   a: T,
   b: T,
-  locale = "ja",
+  locale = 'ja'
 ) => {
-  const A = a.order === null || a.order === undefined ? Infinity : +a.order;
-  const B = b.order === null || b.order === undefined ? Infinity : +b.order;
+  const A = a.order === null || a.order === undefined ? Infinity : +a.order
+  const B = b.order === null || b.order === undefined ? Infinity : +b.order
 
-  if (A !== B) return A - B;
+  if (A !== B) return A - B
 
   /* title may be undefined → fallback to "" to avoid TypeError */
-  const titleA = a.title ?? "";
-  const titleB = b.title ?? "";
+  const titleA = a.title ?? ''
+  const titleB = b.title ?? ''
 
-  return titleA.localeCompare(titleB, locale);
-};
-
-
+  return titleA.localeCompare(titleB, locale)
+}
 
 // helper – flatten Strapi v5 wrapper when present
 const unwrap = <T extends Record<string, any>>(x: any): T =>
@@ -57,26 +55,28 @@ export default async function PeopleIndex({
 }: {
   params: { locale: Locale }
 }) {
-  const locale = params.locale    
+  const locale = params.locale
 
   /* ── all categories view ───────────────────────────────────── */
   const cats: CategoryFlat[] = (await getCategoriesWithPeople(locale))
-  .map((x): CategoryFlat => unwrap<CategoryFlat>(x))
-  .sort((a, b) => byOrderAsc(a, b, locale));
-    
+    .map((x): CategoryFlat => unwrap<CategoryFlat>(x))
+    .sort((a, b) => byOrderAsc(a, b, locale))
+
   return (
     <main className='max-w-6xl mx-auto px-2 py-5'>
       {/* ---------- title with seal icon ---------- */}
-      <div className='mb-10 flex items-center justify-center gap-2'>
+      <div className='mb-10 flex items-center justify-center gap-3 sm:gap-4'>
         <Image
           src='/imgs/buddha_seal.png'
-          alt=''
+          alt='東林寺ロゴ'
           width={88}
           height={88}
-          className='w-26 h-26 object-contain'
+          className='h-16 w-16 sm:h-20 sm:w-20 object-contain'
           priority
         />
-        <h1 className='text-4xl font-bold'>東林人物図鑑</h1>
+        <h1 className='text-2xl font-bold sm:text-3xl md:text-4xl'>
+          東林人物図鑑
+        </h1>
       </div>
 
       {cats.map((cat) => {
@@ -99,13 +99,13 @@ export default async function PeopleIndex({
         if (!people.length) return null
 
         return (
-          
           <CategorySection
             key={cat.id}
             title={cat.title}
             slug={cat.slug}
             people={people}
-            locale={locale}       />
+            locale={locale}
+          />
         )
       })}
     </main>
