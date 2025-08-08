@@ -1,0 +1,29 @@
+{
+  "kind": "singleType",
+  "collectionName": "wonders_pages",
+  "info": {
+    "singularName": "wonders-page",
+    "pluralName": "wonders-pages",
+    "displayName": "Wonders Page"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "content_block": {
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "sections.text-with-img",
+      "repeatable": true
+    }
+  }
+}

@@ -34,6 +34,16 @@
       },
       "component": "sections.page-tab",
       "repeatable": true
+    },
+    "video_info": {
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "blocks.video-block",
+      "repeatable": true
     }
   }
 }

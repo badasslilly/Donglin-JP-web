@@ -14,6 +14,7 @@ interface PageProps {
 }
 
 export default async function PersonPage(props: PageProps) {
+  
   const locale = (props.searchParams?.locale as Locale) ?? "ja";
   const raw    = await getPersonBySlug(props.params.slug, locale);
   const p      = unwrap(raw);

@@ -1,148 +1,141 @@
 /** @format */
 
-'use client'
-
 import Image from 'next/image'
-import Link from 'next/link'
+import clsx  from 'clsx'
 
-import localFont from 'next/font/local'
-import LanguageSwitcher from '@/components/LanguageSwitcher'
+import BorderWrapper        from '@/components/ui/BorderWrapper'
+import SectionTitle         from '@/components/ui/SectionTitle'
+import HomeBottomNav        from '@/components/HomeBottomNav'
+import NewsSection          from '@/components/NewsSection'
+import BlockRendererClient  from '@/components/BlockRendererClient'
+import { ArrowButton }      from '@/components/ui/Button'
 
-import ImageSlider from '@/components/ImageSlider'
-import NewsSection from '@/components/NewsSection'
-import SectionTitle from '@/components/ui/SectionTitle'
-import { ArrowButton } from '@/components/ui/Button'
 import { shippori } from '@/styles/fonts'
+import {
+  Locale,
+  getGlobal,
+  getHomePage,
+  SectionTitleCmp,
+  TextWithImgCmp,
+  ButtonCmp,        //  ← NEW
+} from '@/lib/strapi'
 
-type Locale = 'ja' | 'en'
+export default async function LocaleHome({
+  params,
+}: {
+  params: { locale: Locale }
+}) {
+  const locale = params.locale    
+  /* --------- fetch --------- */
+  const global = await getGlobal(locale)      // not used yet, but keep for nav
+  const home   = await getHomePage(locale)
 
-/* ----------  Main Page Component ---------- */
-export default function LocaleHome({ locale }: { locale: Locale }) {
+  /* --------- About dynamic-zone --------- */
+  const aboutComps = home?.About ?? []
+
+  const aboutTitle = aboutComps.find(
+    (c): c is SectionTitleCmp => c.__component === 'sections.section-title',
+  )
+
+  const aboutIntro = aboutComps.find(
+    (c): c is TextWithImgCmp => c.__component === 'sections.text-with-img',
+  )
+
+  const aboutBtn = aboutComps.find(
+    (c): c is ButtonCmp => c.__component === 'sections.button',
+  )
+
+  /* --------- News heading --------- */
+  const newsTitle =
+    (home?.News ?? []).find(
+      (c): c is SectionTitleCmp => c.__component === 'sections.section-title',
+    ) ?? { title_ja: '新着情報', title_en: 'News' }
+
+  /* --------- Media --------- */
+  const heroVideo =
+    home?.home_video?.data?.attributes?.url ?? '/video/intro.mp4'
+
+  /* helper: choose locale-specific string */
+  const t = (jp: string, en: string) => (locale === 'ja' ? jp : en)
+
   return (
     <main className={`relative overflow-x-hidden ${shippori.className}`}>
+       <header className='h-20 z-0 border-b border-black/10 bg-white/80 backdrop-blur-md'>
+        <div className='mx-auto flex max-w-7xl items-center justify-between px-4 py-3'>
+          <div className='flex flex-col text-[12px] leading-tight tracking-wide'></div>
+        </div>
+      </header>
       {/* ------------------------------------------------------------------
-            Header
-        ------------------------------------------------------------------ */}
-      {/* ------------------------------------------------------------------
-            Hero Section
-        ------------------------------------------------------------------ */}
-      <section className='relative isolate flex h-[40vh] flex-col justify-end overflow-hidden bg-[#f5f5f3] lg:h-[45vh]'>
-        {/* Crest + vertical word‑mark */}
-        <div className='absolute left-6 top-6 flex flex-col items-center gap-4 lg:left-12 lg:top-12'>
-          <Link href='/' aria-label='サイトトップ'>
-            <Image
-              src='/logo/avatar.jpg'
-              alt='東林寺 図章'
-              width={84}
-              height={84}
-              priority
+          Hero (video)
+      ------------------------------------------------------------------ */}
+      <section className="relative isolate flex flex-col justify-end overflow-hidden bg-black h-[50vh] md:h-[70vh] lg:h-[80vh]">
+        <div className="absolute inset-0 z-0 bg-black/50">
+          <BorderWrapper className="h-full w-full">
+            <video
+              className="h-full w-full object-cover"
+              src={heroVideo}
+              autoPlay
+              muted
+              loop
+              playsInline
             />
-          </Link>
-          <Image
-            src='/logo/donglinsi-moji.png'
-            alt='東林寺'
-            width={30}
-            height={150}
-            priority
-            className='h-auto w-12 lg:w-15'
-          />
-        </div>
-
-        {/* Optional hero background photo (uncomment if you have one) */}
-        {/*<Image src="/imgs/hero.jpg" alt="Hero" fill className="absolute inset-0 -z-10 object-cover" />*/}
-
-        {/* English intro & language selector */}
-        <div className='container relative mx-auto max-w-7xl px-35 pb-20 lg:pb-20'>
-          {/* <p className='max-w-sm text-xs leading-relaxed text-charcoal/90 lg:text-sm text-black/90'>
-            Founded in 386 CE by Master Hui Yuan at Mt. Lushan, Donglin
-            Monastery originated the Pure Land School and has inspired monks and
-            poets for centuries. It still upholds strict precepts and Amitabha
-            recitation, serving as a leading Buddhist and international exchange
-            center in Jiangxi.
-          </p> */}
-
-          <div className='mt-6 space-x-4 text-xs font-medium tracking-widest text-charcoal lg:text-sm'>
-            {/* <span className="text-charcoal">JAPANESE</span>
-            <span className="opacity-50">|</span>
-            <span className="opacity-50 hover:opacity-100 transition">ENGLISH</span>
-            <span className="block pt-1 text-center text-charcoal">•</span> */}
-            <LanguageSwitcher />
-          </div>
+          </BorderWrapper>
         </div>
       </section>
-      {/* ------------------------------------------------------------------
-            Highlighted Event Slider (uses SwiperJS)
-        ------------------------------------------------------------------ */}
-      {/* <ImageSlider /> */}
 
-      <section className='relative w-full overflow-hidden bg-black'>
-        <video
-          className='h-[45vh] w-full object-cover lg:h-[85vh]'
-          src='/video/东林道风形象片-《思归》4k最终版.mp4'
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster='/imgs/hero-fallback.jpg' /* optional first frame */
-        />
+      <HomeBottomNav />
 
-        {/* You can overlay headline / CTA here */}
-        {/* <div className="absolute inset-0 flex items-center justify-center">
-       …text or buttons…
-     </div> */}
-      </section>
       {/* ------------------------------------------------------------------
-            About Section
-        ------------------------------------------------------------------ */}
+          About
+      ------------------------------------------------------------------ */}
       <section
-        id='about'
-        className='relative py-20 lg:py-28 lg:px-0 mx-auto max-w-7xl px-4'
+        id="about"
+        className="relative py-20 lg:py-28 mx-auto max-w-7xl px-4"
       >
-        <div className='mx-auto grid gap-10 px-6 lg:grid-cols-[auto_auto_1fr] lg:items-start  '>
-          {/* ───── left : vertical headline ───── */}
+        <div
+          className={clsx(
+            'mx-auto flex flex-row gap-4 md:gap-10 items-start lg:px-0',
+          )}
+        >
           <SectionTitle
-            jp='東林寺について'
-            en='About'
-            className='justify-self-start'
+            jp={aboutTitle?.title_ja ?? ''}
+            en={aboutTitle?.title_en ?? ''}
+            className="lg:mb-14"
           />
 
-          {/* ───── right : map + text — now a 2-col grid ───── */}
-
-          {/* map illustration – top-left aligned */}
-          <div className='place-self-start'>
+          <div className="flex flex-col gap-10 lg:flex-row lg:gap-14 items-center">
+            {/* static map (replace with CMS image if you add one) */}
             <Image
-              src='/imgs/map-of-Lushan.png'
-              alt='Map showing Donglin Temple location'
-              width={320} // smaller width
+              src="/imgs/map-of-Lushan.png"
+              alt="Map showing Donglin Temple location"
+              width={300}
               height={340}
-              className='w-full max-w-xs lg:max-w-sm'
+              className="w-[180px] sm:w-[220px] md:w-[260px] lg:w-[300px]"
             />
-          </div>
-          <div className='w-full max-w-xl'>
-            {/* descriptive copy */}
-            <div className='text-black max-w-lg'>
-              <p className='mb-6 max-w-prose text-sm leading-7 lg:text-base'>
-                廬山は高く雲にそびえ、天地の精気を凝らし、万峰が重なり列をなし、青蓮が天際に広がる。中国江西省、長江中下流南岸に位置する「国家歴史文化名城」九江市の南部に、ある「仏教の聖山」がある。それが「人文始祖の地」である廬山である。東は南昌の滕王閣に接し、南は南昌に向かい、西は京九鉄道に臨み、北は長江中下流の平原地帯と鄱陽湖のほとりにそびえ立つ。廬山はその雄大さ、奇観、険しさ、美しさで広く知られている。
-              </p>
-              <p className='max-w-prose text-sm leading-7 lg:text-base'>
-                遠く晋代まで遡ると、慧遠大師が廬山に至り、寺を創建して東林寺と名づけ、白蓮社を組織し、志を同じくする僧俗とともに西方極楽浄土への往生を願い修行した。廬山の北西麓には「古東林寺」と呼ばれる古刹があり、東晋太元十一年（386年）に完成された。東林寺は中国仏教浄土宗の初祖・慧遠大師が創建した道場であり、南北朝時代以降、「天下仏教八大道場」の一つとして歴代に伝えられた。1600年以上の歳月の中で興亡を繰り返しながらも、その文化の灯を守り続けてきた。
-              </p>
-            </div>
-            <div className='mt-14 text-center'>
-              <ArrowButton href='/about' className='inline-flex'>
-                詳しく見る
-              </ArrowButton>
+
+            <div className="max-w-xl text-black">
+              {aboutIntro && (
+                <BlockRendererClient content={aboutIntro.intro} />
+              )}
+
+              {/* CTA button from CMS, with fallback */}
+              <div className="mt-5 text-center">
+                <ArrowButton
+                  href={aboutBtn?.url ?? '/about'}
+                  className="inline-flex"
+                >
+                  {aboutBtn?.title ?? t('詳しく見る', 'Read more')}
+                </ArrowButton>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
       {/* ------------------------------------------------------------------
-            News Section (latest 3)
-        ------------------------------------------------------------------ */}
-      <NewsSection />
-      {/* ------------------------------------------------------------------
-            Footer
-        ------------------------------------------------------------------ */}
+          News (latest 3)
+      ------------------------------------------------------------------ */}
+      <NewsSection heading={{ jp: newsTitle.title_ja, en: newsTitle.title_en }} button={aboutBtn?.title } />
     </main>
   )
 }

@@ -17,11 +17,11 @@ export default function LanguageSwitcher() {
   }
 
   return (
-    <div className="mt-6 flex gap-4 text-xs font-medium tracking-widest lg:text-sm">
+    <div className="mt-4 flex gap-4 text-xs font-medium tracking-widest lg:text-sm">
       {/* 日本語 */}
       <button
         onClick={switchLocale}
-        className={`flex flex-col items-center uppercase transition hover:opacity-80
+        className={`flex flex-col items-center uppercase transition hover:opacity-80 cursor-pointer
           ${locale === 'ja' ? 'text-black font-bold' : 'text-gray-400'}`}
         aria-label="Switch to Japanese"
       >
@@ -34,7 +34,7 @@ export default function LanguageSwitcher() {
       {/* English */}
       <button
         onClick={switchLocale}
-        className={`flex flex-col items-center uppercase transition hover:opacity-80
+        className={`flex flex-col items-center uppercase transition hover:opacity-80 cursor-pointer
           ${locale === 'en' ? 'text-black font-bold' : 'text-gray-400'}`}
         aria-label="Switch to English"
       >

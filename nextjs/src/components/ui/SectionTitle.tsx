@@ -26,11 +26,11 @@ interface SectionTitleProps {
  */
 export default function SectionTitle({ jp, en, className }: SectionTitleProps) {
   return (
-    <div className={clsx("flex items-center gap-6", className)}>
+    <div className={clsx("flex items-center gap-3 md:gap-6", className)}>
       <h2
         className={clsx(
           AiharahudemojikaishoFont.className,  // apply font directly to heading
-          "text-4xl leading-none  md:text-5xl"
+          "text-3xl sm:text-4xl leading-none  md:text-5xl"
         )}
         style={{ writingMode: "vertical-rl", textOrientation: "upright" }}
       >

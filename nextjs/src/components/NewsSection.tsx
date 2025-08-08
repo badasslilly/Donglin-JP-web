@@ -1,79 +1,90 @@
-"use client";
+/** @format */
+'use client';
 
-import Link from "next/link";
-import { ArrowButton } from "./ui/Button";
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useLocale } from 'next-intl';
+import { ArrowButton } from './ui/Button';
+import { ExternalLink } from 'lucide-react';
+import SectionTitle from './ui/SectionTitle';
+import clsx from 'clsx';
+import type { Locale } from '@/lib/strapi';
 
-import { ExternalLink } from "lucide-react";
-import SectionTitle from "./ui/SectionTitle";
 
-/* Dummy data (replace with CMS fetch) */
-const newsData = [
-  {
-    href: "/news/20250617-176",
-    date: "2025.06.17",
-    title: "廬山東林寺第22回「極楽浄土への旅・サマーキャンプ」参加者募集中",
-  },
-  {
-    href: "/news/20250609-171",
-    date: "2025.06.09",
-    title: "第55回「彼岸行・体験の旅」、いよいよスタート！",
-  },
-  {
-    href: "/news/20250503-166",
-    date: "2025.05.03",
-    title: "東林寺浄土苑の光寿関房、洒浄・啓用法会が無事に執り行われました。",
-  },
-];
+interface NewsItem {
+  id: number;
+  title?: string;
+  slug?: string;
+  date?: string; // ISO yyyy-mm-dd
+}
 
-export default function NewsSection() {
+/* ✨ NEW: allow parent to override the heading text */
+interface Props {
+  heading?: { jp: string; en: string };
+  button?:  string ;
+}
+
+export default function NewsSection({ heading, button }: Props) {
+  const locale = useLocale() as Locale;
+  const [news, setNews] = useState<NewsItem[]>([]);
+  /* fetch latest 3 news items */
+  useEffect(() => {
+    const API = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://127.0.0.1:1337';
+
+    const qs = new URLSearchParams();
+    qs.append('locale', locale);
+    ['title', 'slug', 'date'].forEach((f) => qs.append('fields', f));
+    qs.append('sort', 'date:desc');
+    qs.append('pagination[pageSize]', '3');
+
+    fetch(`${API}/api/news-items?${qs.toString()}`)
+      .then((r) => r.json())
+      .then((json) => setNews(Array.isArray(json.data) ? json.data : []))
+      .catch((e) => console.error('[NewsSection] fetch failed', e));
+  }, [locale]);
+
   return (
-    <section
-      id="news"
-      className="bg-stone-50 bg-repeat py-24 md:py-32"
-    >
+    <section id="news" className="bg-stone-50 bg-repeat py-20 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4">
-        {/* ————————————————————————————————————— Two‑column layout */}
-        <div className="grid gap-10 md:grid-cols-[auto_1fr] md:items-start">
-          {/* Left : vertical title */}
-          <SectionTitle
-            jp="新着情報"
-            en="News"
-            className="justify-self-start"
+        <div
+          className={clsx(
+            'mx-auto flex flex-col gap-10 sm:flex-row sm:gap-12 lg:gap-16',
+            'px-4 sm:px-6 lg:px-0 items-start'
+          )}
+        >
+           <SectionTitle
+            jp={heading?.jp ?? '新着情報'}
+            en={heading?.en ?? 'News'}
+            className="shrink-0"
           />
 
-          {/* Right : news list + button */}
           <div className="w-full max-w-3xl">
-            {newsData.map((n) => (
-              <div key={n.href}>
+            {news.map(({ id, title, slug, date }) => (
+              <div key={id}>
                 <article className="grid grid-cols-[110px_1fr_auto] items-start gap-4 text-sm md:text-base">
-                  {/* date */}
-                  <time className="font-medium text-gray-700">{n.date}</time>
-
-                  {/* title link */}
+                  <time className="font-medium text-gray-700 sm:pt-1">
+                    {date?.replaceAll('-', '.')}
+                  </time>
                   <Link
-                    href={n.href}
+                    href={`/news/${slug}`}
                     className="pb-0.5 text-gray-900 transition-colors hover:text-indigo-600"
                   >
-                    {n.title}
+                    {title}
                   </Link>
-
-                  {/* external icon link */}
                   <Link
-                    href={n.href}
+                    href={`/news/${slug}`}
                     className="ml-auto shrink-0 p-1 text-gray-600 transition-colors hover:text-indigo-600"
                   >
                     <ExternalLink strokeWidth={1.5} size={18} />
                   </Link>
                 </article>
-                {/* divider under every item, including the 3rd */}
-                <hr className="my-6 border-t border-stone-300/70" />
+                <hr className="my-5 sm:my-6 border-t border-stone-300/70" />
               </div>
             ))}
 
-            {/* Action button – centered relative to list width */}
-            <div className="mt-14 text-center">
+            <div className="mt-10 sm:mt-14 text-center">
               <ArrowButton href="/news" className="inline-flex">
-                お知らせ一覧
+                {button}
               </ArrowButton>
             </div>
           </div>

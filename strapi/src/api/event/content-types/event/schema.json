@@ -77,6 +77,48 @@
         "month-11",
         "month-12"
       ]
+    },
+    "event_kind": {
+      "type": "enumeration",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "enum": [
+        "Ceremonies_Events",
+        "Courses_Lecture",
+        "Spiritual_Practice"
+      ]
+    },
+    "participation_tag": {
+      "type": "enumeration",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "enum": [
+        "temple_visit ",
+        "reservation_required",
+        "experiential"
+      ]
+    },
+    "location": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "time": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

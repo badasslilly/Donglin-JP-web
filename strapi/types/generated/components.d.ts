@@ -13,6 +13,42 @@ export interface BlocksArticle extends Struct.ComponentSchema {
   };
 }
 
+export interface BlocksContentSection extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_content_sections';
+  info: {
+    displayName: 'Content Section';
+  };
+  attributes: {
+    blocks: Schema.Attribute.Component<'blocks.content-subsection', true>;
+    section_title: Schema.Attribute.String;
+  };
+}
+
+export interface BlocksContentSubsection extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_content_subsections';
+  info: {
+    displayName: 'content subsection';
+  };
+  attributes: {
+    image: Schema.Attribute.Media<'images'>;
+    intro: Schema.Attribute.Text;
+    subtitle: Schema.Attribute.String;
+  };
+}
+
+export interface BlocksVideoBlock extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_video_blocks';
+  info: {
+    displayName: 'Video Block';
+  };
+  attributes: {
+    description: Schema.Attribute.Text;
+    posterUrl: Schema.Attribute.Media<'images'>;
+    title: Schema.Attribute.String;
+    videoUrl: Schema.Attribute.String;
+  };
+}
+
 export interface SectionsButton extends Struct.ComponentSchema {
   collectionName: 'components_sections_buttons';
   info: {
@@ -129,6 +165,9 @@ declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
       'blocks.article': BlocksArticle;
+      'blocks.content-section': BlocksContentSection;
+      'blocks.content-subsection': BlocksContentSubsection;
+      'blocks.video-block': BlocksVideoBlock;
       'sections.button': SectionsButton;
       'sections.hero': SectionsHero;
       'sections.page-tab': SectionsPageTab;

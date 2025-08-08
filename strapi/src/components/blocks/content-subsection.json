@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_blocks_content_subsections",
+  "info": {
+    "displayName": "content subsection"
+  },
+  "options": {},
+  "attributes": {
+    "subtitle": {
+      "type": "string"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "intro": {
+      "type": "text"
+    }
+  },
+  "config": {}
+}

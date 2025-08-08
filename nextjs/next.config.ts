@@ -2,6 +2,7 @@ import {NextConfig} from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
  
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
   images: {
     remotePatterns: [
       {
@@ -10,7 +11,12 @@ const nextConfig: NextConfig = {
         port: '1337',              // if you use :1337 in dev
         pathname: '/uploads/**'
       },
-
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '1337',
+        pathname: '/uploads/**',
+      },
     ]
   }
 };

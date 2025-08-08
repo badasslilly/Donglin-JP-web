@@ -36,7 +36,8 @@
         }
       },
       "components": [
-        "sections.section-title"
+        "sections.section-title",
+        "sections.button"
       ]
     },
     "handwritng_logo_v": {
@@ -61,6 +62,18 @@
       "multiple": false,
       "allowedTypes": [
         "images"
+      ]
+    },
+    "home_video": {
+      "type": "media",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "multiple": false,
+      "allowedTypes": [
+        "videos"
       ]
     }
   }

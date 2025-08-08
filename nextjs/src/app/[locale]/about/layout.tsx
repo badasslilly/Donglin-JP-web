@@ -4,6 +4,7 @@ import HeroHeader from "@/components/ui/HeroHeader";
 import { getAboutPage, mediaURL, Locale } from "@/lib/strapi";
 import { cache } from "react";
 import { shippori } from "@/styles/fonts";
+import BorderWrapper from "@/components/ui/BorderWrapper";
 
 const getShell = cache(async (locale: Locale) => {
   const about = await getAboutPage(locale);
@@ -31,9 +32,9 @@ export default async function AboutLayout({
     const { heroSrc, jaTitle, enTitle, tabs } = await getShell(locale);
 
   return (
-    <div className={`min-h-screen bg-white text-gray-900 ${shippori.className} font-semibold`}>
+    <div className={`min-h-screen bg-white text-gray-900 ${shippori.className} `}>
       <HeroHeader bgSrc={heroSrc} title={jaTitle} subtitle={enTitle} />
-
+      
       {tabs.length > 0 && (
         <PageTabs
           tabs={tabs}

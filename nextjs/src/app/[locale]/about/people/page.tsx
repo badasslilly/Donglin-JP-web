@@ -3,22 +3,15 @@
 import Image from 'next/image'
 
 import { getCategoriesWithPeople, mediaURL, Locale } from '@/lib/strapi'
-import CategorySection from '@/components/ui/CategorySection'
+import CategorySection, { PersonFlat } from '@/components/ui/CategorySection'
 
 interface PersonRaw {
   id: number
+  slug: string
   name: string
   order?: number | null
   brief?: string
   portrait?: { url?: string; data?: { attributes: { url: string } } }
-}
-
-interface PersonFlat {
-  id: number
-  name: string
-  order?: number | null
-  brief?: string
-  src: string
 }
 
 interface CategoryFlat {
@@ -60,11 +53,11 @@ interface PageProps {
 }
 
 export default async function PeopleIndex({
-    searchParams: promiseSP,
-  }: {
-    searchParams: Promise<{ locale?: Locale; category?: string }>;
-  }) {
-    const { locale = "ja" } = await promiseSP;
+  params,
+}: {
+  params: { locale: Locale }
+}) {
+  const locale = params.locale    
 
   /* ── all categories view ───────────────────────────────────── */
   const cats: CategoryFlat[] = (await getCategoriesWithPeople(locale))
@@ -93,6 +86,7 @@ export default async function PeopleIndex({
           .map(
             (p: PersonRaw): PersonFlat => ({
               id: p.id,
+              slug: p.slug,
               name: p.name,
               brief: p.brief,
               order: p.order,
@@ -105,31 +99,13 @@ export default async function PeopleIndex({
         if (!people.length) return null
 
         return (
-          // <section key={cat.id} className='mb-20'>
-          //   <div className='mb-4 flex justify-between items-center pb-5'>
-          //     <BannerTitle
-          //       title={cat.title}
-          //       href={`/people?category=${cat.slug}`}
-          //     />
-          //   </div>
-
-          //   <div className='grid gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
-          //     {people.map((p: PersonFlat) => (
-          //       <PersonCard
-          //         key={p.id}
-          //         name={p.name}
-          //         portrait={p.portrait}
-          //         biography={p.brief}
-          //       />
-          //     ))}
-          //   </div>
-          // </section>
+          
           <CategorySection
             key={cat.id}
             title={cat.title}
             slug={cat.slug}
             people={people}
-          />
+            locale={locale}       />
         )
       })}
     </main>
