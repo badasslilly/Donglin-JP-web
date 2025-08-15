@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_blocks_history_items",
+  "info": {
+    "displayName": "History Item"
+  },
+  "options": {},
+  "attributes": {
+    "era": {
+      "type": "string"
+    },
+    "person": {
+      "type": "string"
+    },
+    "brief": {
+      "type": "text"
+    }
+  },
+  "config": {}
+}

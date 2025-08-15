@@ -5,7 +5,6 @@ import { Metadata } from 'next';
 import { ExternalLink } from 'lucide-react';
 
 import HeroHeader   from '@/components/ui/HeroHeader';
-import SectionTitle from '@/components/ui/SectionTitle';
 import { shippori } from '@/styles/fonts';
 import { getNewsList, Locale } from '@/lib/strapi';
 
@@ -41,7 +40,7 @@ export default async function NewsIndex({
                 <Link
                   href={`/news/${n.slug}`}
                   locale={locale}
-                  className="pb-0.5 text-gray-900 transition-colors hover:text-indigo-600"
+                  className="pb-0.5 text-gray-900 transition-colors hover:text-purple-700"
                 >
                   {n.title}
                 </Link>
@@ -49,7 +48,7 @@ export default async function NewsIndex({
                 <Link
                   href={`/news/${n.slug}`}
                   locale={locale}
-                  className="ml-auto shrink-0 p-1 text-gray-600 transition-colors hover:text-indigo-600"
+                  className="ml-auto shrink-0 p-1 text-gray-600 transition-colors hover:text-purple-700"
                 >
                   <ExternalLink size={18} strokeWidth={1.5} />
                 </Link>

@@ -15,6 +15,22 @@
     }
   },
   "attributes": {
+    "page_headline": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "intro": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "content_block": {
       "type": "component",
       "pluginOptions": {

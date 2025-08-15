@@ -32,7 +32,7 @@ export default function HeroHeader({
   className = "",
 }: HeroHeaderProps) {
   return (
-    <section
+    <section data-hero
       className={clsx(
         "relative h-[50vh] min-h-[320px] w-full overflow-hidden",
         className

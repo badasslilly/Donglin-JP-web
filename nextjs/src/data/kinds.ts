@@ -47,3 +47,16 @@ export function kindColor(key: string) {
 export function badgeColor(key: string) {
   return TAG_COLOR[key as keyof typeof TAG_COLOR] ?? 'border-gray-500 text-gray-700'
 }
+
+export function methodBadges(raw: any, locale: "ja" | "en") {
+  const a = raw?.attributes ?? raw ?? {};
+  const badges: { label: string; color: string }[] = [];
+  if (a.has_in_person) badges.push({ label: locale === "ja" ? "現地" : "In person", color: "border" });
+  if (a.has_mail)      badges.push({ label: locale === "ja" ? "郵送可" : "Mail",      color: "border" });
+  if (a.has_digital)   badges.push({ label: locale === "ja" ? "デジタル" : "Digital",  color: "border" });
+  if (a.stock_status === "low")
+    badges.push({ label: locale === "ja" ? "残りわずか" : "Low stock", color: "border-red-400 text-red-600" });
+  if (a.stock_status === "out")
+    badges.push({ label: locale === "ja" ? "欠品" : "Out of stock", color: "border-gray-300 text-gray-400" });
+  return badges;
+}

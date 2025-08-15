@@ -1,7 +1,7 @@
 /** @format */
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -31,7 +31,33 @@ export default function SiteNav({ locale, items, logoUrl }: Props) {
   const pathname = usePathname();
   const isHome   = pathname === `/${locale}`;
   const [open, setOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const [isLightBg, setIsLightBg] = useState(!isHome); // subpages default to light
 
+  useEffect(() => {
+    // Look for a hero section
+    const hero = document.querySelector<HTMLElement>('[data-hero]');
+    // If there is no hero, assume page background is light (black text)
+    if (!hero) {
+      setIsLightBg(true);
+      return;
+    }
+
+    const update = () => {
+      const headerH = headerRef.current?.offsetHeight ?? 64;
+      const rect = hero.getBoundingClientRect();
+      // While the hero bottom is still below the header, we’re on a dark image area
+      setIsLightBg(rect.bottom <= headerH);
+    };
+
+    update(); // run once on mount
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, [isHome]);
   /* --------------------- Drawer --------------------- */
   const Drawer = (
     <>
@@ -91,8 +117,14 @@ export default function SiteNav({ locale, items, logoUrl }: Props) {
   );
 
   /* --------------------- Top Header (home + mobile) --------------------- */
+  const menuColor = isLightBg ? 'text-black' : 'text-white/90';
+  const glassLogo = clsx(
+    'backdrop-blur-sm rounded px-2 py-1 transition-colors',
+    isLightBg ? '' : 'bg-black/5 '
+  );
+  
   const TopHeader = (
-    <header className='fixed top-0 left-0 right-0 z-50'>
+    <header ref={headerRef} className='fixed top-0 left-0 right-0 z-50'>
       <nav
         className={clsx(
           'mx-auto flex max-w-8xl items-center justify-between px-4 py-4 md:px-8', !isHome && 'lg:hidden',
@@ -101,7 +133,7 @@ export default function SiteNav({ locale, items, logoUrl }: Props) {
       >
         {/* Logo + vertical text */}
         <Link href='/' locale={locale} className='shrink-0 cursor-pointer'>
-          <div className='flex items-center gap-2'>
+        <div className={clsx('flex items-center gap-2', glassLogo)}>
             <Image src='/logo/avatar.png' alt='Donglin Monastery crest' width={44} height={44} priority />
             <div className='leading-tight'>
               <Image src={logoUrl || '/logo/logo.png'} alt='東林寺' width={100} height={150} priority className='h-auto w-20' />
@@ -113,7 +145,10 @@ export default function SiteNav({ locale, items, logoUrl }: Props) {
         <button
           onClick={() => setOpen(!open)}
           aria-label='メニュー'
-          className='group flex flex-col items-center justify-center h-12 w-12 text-black text-[10px] backdrop-blur-sm transition-transform duration-200 hover:scale-105 mix-blend-difference cursor-pointer'
+          className={clsx(
+            'group flex flex-col items-center justify-center h-12 w-12 text-[10px] backdrop-blur-sm rounded transition-transform duration-200 hover:scale-105 cursor-pointer',
+            menuColor
+          )}
         >
           <div className='w-8 border-t border-current mb-[5px] transition-all duration-300 group-hover:w-7' />
           <div className='w-8 border-t border-current mb-[2px] transition-all duration-300 group-hover:w-7' />

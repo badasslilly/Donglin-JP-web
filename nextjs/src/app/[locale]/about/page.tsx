@@ -1,6 +1,6 @@
 /** @format */
 import SectionHeading from '@/components/ui/SectionHeading';
-import Table from '@/components/ui/Table';
+import Table, { HistoryRow } from '@/components/ui/Table';
 import VerticalBookmark from '@/components/ui/VerticalBookmark'
 import { getAboutPage, mediaURL } from '@/lib/strapi'
 import type { Locale } from '@/lib/strapi'
@@ -23,6 +23,7 @@ function renderBlocks(blocks: any[]) {
   )
 }
 
+
 /* ---------- page component ---------------------------------------- */
 export default async function AboutPage({
   params,
@@ -34,7 +35,11 @@ export default async function AboutPage({
 
   /* 2. fetch everything – deep,4 */
   const data = await getAboutPage(locale)
-
+  const rows: HistoryRow[] = (data.history ?? []).map(h => ({
+    period: h.era ?? '',
+    name:   h.person ?? '',
+    notes:  h.brief ?? '',
+  }));
   /* 5. render -------------------------------------------------------------- */
   return (
     <main
@@ -47,31 +52,21 @@ export default async function AboutPage({
           <div className='mb-8 flex items-center gap-3'>
             <span className='text-4xl'>☘</span>
             <h2 className='text-3xl font-bold tracking-wide sm:text-4xl'>
-              東晋時代から続く歴史
+              {data.page_title}
             </h2>
           </div>
 
           {/* ───── Paragraphs ───── */}
           <div className='space-y-6 leading-relaxed text-[1rem] sm:text-lg'>
             <p>
-              江西省の廬山は、漢代の史家・司馬遷が『史記』に「南登廬山」と記したことで名が知られ、
-              奇麗な自然と文化が交差する隠遁文化の聖山として知られてきました。
-            </p>
-            <p>
-              東晋末、僧・慧遠大師がこの地に東林寺を開き、多くの高僧・学者を集めて仏法を弘め、
-              中国初の念仏結社「白蓮社」を創立。阿弥陀仏を念じ、西方浄土への往生を願う修行を実践しました。
-              これにより、廬山は南方仏教の中心地となり、東林寺は「蓮宗第一祖庭」として浄土宗の源となりました。
-            </p>
-            <p>
-              その後、幾度も興亡を経験しながらも、信仰と修行の場として脈々と命脈を保ち、
-              現代に至っては宗教自由政策のもと、祖庭としての輝きを再び取り戻しつつあります。
+              {data.intro_text}
             </p>
           </div>
         </div>
       </section>
       {/* ─────────── history section ─────────── */}
-      <SectionHeading title={'東林寺寺史'} />
-      <Table />
+      <SectionHeading title={data.history_headline ?? ''} />
+      <Table rows={rows} locale={locale} />
       {/* content blocks */}
       <article className='mx-auto max-w-5xl px-4 pb-24 space-y-14'>
       {(data.content ?? []).map((b, i) => {
@@ -91,7 +86,7 @@ export default async function AboutPage({
     <section
       key={i}
       className="relative mt-14 rounded-lg border border-[#e5e2d3]
-                 bg-[#f6f3e7]/60 p-5 md:p-6 lg:p-12"
+                bg-[#f6f3e7]/60 p-5 md:p-6 lg:p-12"
     >
       {/* bookmark (desktop) */}
       {b.headline && (

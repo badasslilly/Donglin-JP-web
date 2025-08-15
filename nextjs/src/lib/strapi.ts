@@ -35,11 +35,22 @@ export async function strapiFetch<T = unknown>(path: string): Promise<T> {
   return (await res.json()).data as T;
 }
 
-
-export function mediaURL(path?: string | null) {
-  return !path ? "" : path.startsWith("http") ? path : `${API}${path}`;
+export function mediaURL(path?: string | null): string {
+  if (!path) return "";
+  return path.startsWith("http") ? path : `${API}${path}`;
 }
 
+/** Accept both Strapi media shapes: flat {url} and nested {data.attributes.url} */
+export type MediaLike =
+  | { url?: string }
+  | { data?: { attributes?: { url?: string } } };
+
+/** Safe resolver -> absolute URL string (or empty string if missing) */
+export function resolveMediaUrl(m?: MediaLike): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = (m as any)?.url ?? (m as any)?.data?.attributes?.url ?? "";
+  return mediaURL(raw || "");
+}
 /* ------------------------------------------------------------------ */
 /*  Site-wide Global (unchanged)                                      */
 /* ------------------------------------------------------------------ */
@@ -140,16 +151,26 @@ export interface AboutPageData {
     intro?: unknown;
     image?: { url: string } | null;
   }[];
+  page_title?: string | null;
+  intro_text?: string | null;
+  history_headline?: string | null;
+  history?: {
+    era?: string | null;
+    person?: string | null;
+    brief?: string | null;
+  }[];
 }
 
 /* ------------ selective populate -- */
 export async function getAboutPage(locale: Locale): Promise<AboutPageData> {
   const q = qs.stringify({
     locale,
+    fields: ['page_title', 'intro_text', 'history_headline'],
     populate: {
       header:  { populate: ['bg_image', 'heading'] },
       tab_bar: true,
-      content: { populate: ['image'] }
+      content: { populate: ['image'] },
+      history: true, 
     }
   });
   return await strapiFetch<AboutPageData>(`/api/about-page?${q}`);
@@ -341,6 +362,56 @@ export async function getPurelandPathPage(
   );
 
   return { section_block };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Wonders Page (浄土宗修学概述)                                */
+/* ------------------------------------------------------------------ */
+export interface WonderContent {
+  id: number;
+  headline?: string | null;
+  intro: unknown;                     // RTE / Blocks
+  image?: { url: string } | undefined;
+}
+
+export interface WondersPageData {
+  page_headline?: string | null;
+  intro?: string | null;
+  content_block: WonderContent[];
+}
+
+export async function getWondersPage(locale: Locale): Promise<WondersPageData> {
+  const q = toQuery({
+    locale,
+    fields:   ["page_headline", "intro"],  
+    populate: {
+      // populate the media field on the repeatable component
+      content_block: { populate: ['image'] },
+    },
+  });
+
+  // strapiFetch returns `.data`; single-type => { id, attributes }
+  const raw = await strapiFetch<any>(`/api/wonders-page?${q}`);
+  const attrs = 'attributes' in raw ? raw.attributes : raw;
+
+  const getImageUrl = (img: any): string | undefined =>
+    img?.url ??
+    img?.data?.attributes?.url ??
+    undefined;
+
+  const content_block: WonderContent[] = (attrs.content_block ?? []).map(
+    (item: any): WonderContent => ({
+      id: item.id,
+      headline: item.headline ?? null,
+      intro: item.intro,
+      image: getImageUrl(item.image) ? { url: getImageUrl(item.image)! } : undefined,
+    })
+  );
+
+  return { 
+    page_headline: attrs.page_headline ?? null,
+    intro: attrs.intro ?? null,
+    content_block };
 }
 
 

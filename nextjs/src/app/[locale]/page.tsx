@@ -17,7 +17,9 @@ import {
   getHomePage,
   SectionTitleCmp,
   TextWithImgCmp,
-  ButtonCmp,        //  ← NEW
+  ButtonCmp,
+  mediaURL,
+  resolveMediaUrl,        //  ← NEW
 } from '@/lib/strapi'
 
 export default async function LocaleHome({
@@ -53,7 +55,7 @@ export default async function LocaleHome({
 
   /* --------- Media --------- */
   const heroVideo =
-    home?.home_video?.data?.attributes?.url ?? '/video/intro.mp4'
+  resolveMediaUrl(home?.home_video);
 
   /* helper: choose locale-specific string */
   const t = (jp: string, en: string) => (locale === 'ja' ? jp : en)
@@ -135,7 +137,7 @@ export default async function LocaleHome({
       {/* ------------------------------------------------------------------
           News (latest 3)
       ------------------------------------------------------------------ */}
-      <NewsSection heading={{ jp: newsTitle.title_ja, en: newsTitle.title_en }} button={aboutBtn?.title } />
+      <NewsSection heading={{ jp: newsTitle.title_ja, en: newsTitle.title_en }} button={aboutBtn?.title ?? t('お知らせ一覧', 'View All')} />
     </main>
   )
 }

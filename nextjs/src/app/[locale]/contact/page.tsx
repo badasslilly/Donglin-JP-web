@@ -1,23 +1,40 @@
 /** @format */
+// app/contact/page.tsx
 
+import { shippori } from '@/styles/fonts';
+import HeroHeader from '@/components/ui/HeroHeader';
+import ContactPageClient from '@/components/ContactPageClient';
+import { getDictionary, isLocale, type Locale } from '@/i18n/get-dictionary';
 
+// Helper to convert readonly/undefined -> mutable string[]
+const toMutable = (arr?: readonly string[]) => Array.from(arr ?? []);
 
-import HeroHeader from '@/components/ui/HeroHeader'
-import { shippori } from '@/styles/fonts'
+export default async function ContactPage({
+  params,
+}: {
+  params: { locale: Locale }
+}) {
+  const locale = params.locale    
+  // If this route is static (app/contact), no params exist -> default to 'ja'
 
+  const dict = await getDictionary(locale);
 
+  // Build mutable, non-undefined arrays for the client
+  const options = {
+    cats:        toMutable(dict.options?.cats),
+    desired:     toMutable(dict.options?.desired),
+    age:         toMutable(dict.options?.age),
+    gender:      toMutable(dict.options?.gender),
+    enquete_cat: toMutable(dict.options?.enquete_cat),
+    reason:      toMutable(dict.options?.reason),
+    evaluation1: toMutable(dict.options?.evaluation1),
+    evaluation2: toMutable(dict.options?.evaluation2),
+  };
 
-export default function Contact() {
   return (
-    <main
-      className={`min-h-screen bg-white text-gray-900 ${shippori.className} font-semibold`}
-    >
-      {/* ─────────── Hero ─────────── */}
-      <HeroHeader
-        bgSrc={'/imgs/sub-pages/comeback.jpg'}
-        title={'お問い合わせ'}
-        subtitle='contact'
-      />
+    <main className={`min-h-screen text-[#1f1f1f] ${shippori.className}`}>
+      <HeroHeader bgSrc="/imgs/sub-pages/comeback.jpg" title="お問い合わせ" subtitle="contact" />
+      <ContactPageClient dict={dict} options={options} lang={locale} />
     </main>
-  )
+  );
 }

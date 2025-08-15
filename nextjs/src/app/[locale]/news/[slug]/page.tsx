@@ -4,7 +4,7 @@ import { getNewsBySlug, Locale } from '@/lib/strapi';
 import { shippori } from '@/styles/fonts';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+
 
 export default async function NewsDetail({
   params,

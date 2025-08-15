@@ -7,7 +7,7 @@ import AnnualTimeline, { AnnualEvent } from '@/components/ui/AnnualTimeline'
 import MonthMenu from '@/components/ui/MonthMenu'
 import Legend from '@/components/ui/Legend'
 import EventTabs from '@/components/ui/EventTabs'
-import { getAllEvents } from '@/lib/strapi'
+import { getAllEvents, Locale } from '@/lib/strapi'
 
 // export const annualEvents2025: AnnualEvent[] = [
 //   {
@@ -63,8 +63,9 @@ export function toMonthNumber(raw?: string | null): number | undefined {
 export default async function Events({
   params,
 }: {
-  params: { locale: string }
+  params: { locale: Locale }
 }) {
+
   const strapiEvents = await getAllEvents(params.locale)
 
   const annualEvents: AnnualEvent[] = strapiEvents.map((ev) => {
@@ -91,7 +92,7 @@ export default async function Events({
     <div
       className={`mx-auto max-w-6xl px-4 pt-15 pb-14 space-y-14 ${shippori.className} font-semibold`}
     >
-      <Legend />
+      <Legend locale={params.locale} />
 
       <h2 className='mb-4 border-b border-gray-300 pt-5 pb-3 text-2xl font-semibold tracking-widest'>
         年間行事
