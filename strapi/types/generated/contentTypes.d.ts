@@ -441,13 +441,16 @@ export interface ApiAboutPageAboutPage extends Struct.SingleTypeSchema {
           localized: true;
         };
       }>;
-    history: Schema.Attribute.Component<'blocks.history-item', true> &
+    history_headline: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
-    history_headline: Schema.Attribute.String &
+    history_section: Schema.Attribute.Component<
+      'sections.history-section',
+      true
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;

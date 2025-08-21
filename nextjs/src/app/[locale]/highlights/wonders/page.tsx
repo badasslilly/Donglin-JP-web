@@ -41,7 +41,7 @@ export default async function WondersPage({ params }: PageProps) {
 
         return (
           <section key={sec.id} className="space-y-10">
-            <div className="grid grid-cols-1 gap-10 pt-10 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="grid grid-cols-1 gap-10 pt-10">
               <BorderBox
                 title={sec.headline ?? ''}
                 side={imageOnRight ? 'right' : 'left'}

@@ -44,7 +44,6 @@ export interface BlocksHistoryItem extends Struct.ComponentSchema {
   attributes: {
     brief: Schema.Attribute.Text;
     era: Schema.Attribute.String;
-    person: Schema.Attribute.String;
   };
 }
 
@@ -79,6 +78,17 @@ export interface SectionsHero extends Struct.ComponentSchema {
   attributes: {
     bg_image: Schema.Attribute.Media<'images'>;
     heading: Schema.Attribute.Component<'sections.section-title', false>;
+  };
+}
+
+export interface SectionsHistorySection extends Struct.ComponentSchema {
+  collectionName: 'components_sections_history_sections';
+  info: {
+    displayName: 'History Section';
+  };
+  attributes: {
+    content: Schema.Attribute.Component<'blocks.history-item', true>;
+    section_name: Schema.Attribute.String;
   };
 }
 
@@ -183,6 +193,7 @@ declare module '@strapi/strapi' {
       'blocks.video-block': BlocksVideoBlock;
       'sections.button': SectionsButton;
       'sections.hero': SectionsHero;
+      'sections.history-section': SectionsHistorySection;
       'sections.page-tab': SectionsPageTab;
       'sections.section-title': SectionsSectionTitle;
       'sections.slide': SectionsSlide;

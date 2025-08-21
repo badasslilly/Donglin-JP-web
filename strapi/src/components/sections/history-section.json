@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_sections_history_sections",
+  "info": {
+    "displayName": "History Section"
+  },
+  "options": {},
+  "attributes": {
+    "section_name": {
+      "type": "string"
+    },
+    "content": {
+      "type": "component",
+      "component": "blocks.history-item",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

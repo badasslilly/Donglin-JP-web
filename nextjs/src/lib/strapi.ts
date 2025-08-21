@@ -138,8 +138,17 @@ export async function getHomePage(locale: Locale): Promise<HomePageRaw | null> {
   return await strapiFetch<HomePageRaw>(`/api/home-page?${q}`)
 }
 
-
 /* ----------  About Page types -------------------------------------- */
+export interface HistoryItem {
+  era?: string | null;
+  brief?: string | null;
+}
+
+export interface HistorySection {
+  section_name?: string | null;
+  content?: HistoryItem[];          // repeatable component “History Item”
+}
+
 export interface AboutPageData {
   header?: {
     heading?: { title_ja?: string; title_en?: string } | null;
@@ -153,29 +162,33 @@ export interface AboutPageData {
   }[];
   page_title?: string | null;
   intro_text?: string | null;
-  history_headline?: string | null;
-  history?: {
-    era?: string | null;
-    person?: string | null;
-    brief?: string | null;
-  }[];
+
+  // ⬇️ replaced fields
+  history_section?: HistorySection[];   // repeatable “History Section”
 }
 
-/* ------------ selective populate -- */
+/* ------------ selective populate ----------------------------------- */
 export async function getAboutPage(locale: Locale): Promise<AboutPageData> {
-  const q = qs.stringify({
-    locale,
-    fields: ['page_title', 'intro_text', 'history_headline'],
-    populate: {
-      header:  { populate: ['bg_image', 'heading'] },
-      tab_bar: true,
-      content: { populate: ['image'] },
-      history: true, 
-    }
-  });
+  const q = qs.stringify(
+    {
+      locale,
+      fields: ['page_title', 'intro_text'],  // removed 'history_headline'
+      populate: {
+        header:  { populate: ['bg_image', 'heading'] },
+        tab_bar: true,
+        content: { populate: ['image'] },
+
+        // NEW: nested component -> nested populate
+        history_section: {
+          populate: { content: true }, // brings [ { era, brief } ... ]
+        },
+      },
+    },
+    { encodeValuesOnly: true },
+  );
+
   return await strapiFetch<AboutPageData>(`/api/about-page?${q}`);
 }
-
 
 /* ------------------------------------------------------------------ */
 /*  Highlights Page (single type)                                     */

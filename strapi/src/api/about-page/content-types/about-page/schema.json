@@ -59,14 +59,14 @@
         }
       }
     },
-    "history": {
+    "history_section": {
       "type": "component",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
-      "component": "blocks.history-item",
+      "component": "sections.history-section",
       "repeatable": true
     },
     "content": {

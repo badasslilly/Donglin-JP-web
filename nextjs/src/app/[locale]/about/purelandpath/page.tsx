@@ -31,7 +31,7 @@ export default async function PurelandPathPage({ params }: PageProps) {
           {sec.headline && <SectionHeading title={sec.headline} />}
 
           {/* ── grid of BorderBoxes ───────────────────────────────────── */}
-          <div className='grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-1 pt-10'>
+          <div className='grid grid-cols-1 gap-10 pt-10'>
             {sec.content.map((item, idx) => (
               <BorderBox
                 key={item.id}

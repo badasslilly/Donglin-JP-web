@@ -8,9 +8,6 @@
     "era": {
       "type": "string"
     },
-    "person": {
-      "type": "string"
-    },
     "brief": {
       "type": "text"
     }
