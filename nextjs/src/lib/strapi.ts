@@ -6,10 +6,9 @@ import { cache } from "react";
 /* ------------------------------------------------------------------ */
 /*  ENV – set these in .env                                           */
 /* ------------------------------------------------------------------ */
-const PUBLIC   = process.env.NEXT_PUBLIC_STRAPI_URL!;
-const INTERNAL = process.env.STRAPI_INTERNAL_URL;         // e.g. http://127.0.0.1:1337
+const PUBLIC   = process.env.NEXT_PUBLIC_STRAPI_URL!;  
+const INTERNAL = (process.env.STRAPI_INTERNAL_URL || PUBLIC).replace(/\/+$/, '');  // e.g. http://127.0.0.1:1337
 const TOKEN = process.env.STRAPI_TOKEN!;      // read-only API token
-const isServer = typeof window === 'undefined';
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
@@ -24,13 +23,19 @@ function toQuery(obj: object) {
 
 /* helper ----------------------------------------------------------- */
 export async function strapiFetch<T = unknown>(path: string): Promise<T> {
+  const isServer = typeof window === 'undefined';
+  const base     = isServer ? INTERNAL : PUBLIC;
   const url =
     /^https?:\/\//.test(path)
       ? path
-      : `${isServer ? INTERNAL : PUBLIC}${path.startsWith('/') ? '' : '/'}${path}`;
-
-  // Debug log
-  console.log('[Strapi]', url);
+      : (() => {
+          if (!base) {
+            throw new Error(
+              'Strapi base URL is not set. Set NEXT_PUBLIC_STRAPI_URL (and STRAPI_INTERNAL_URL for server).'
+            );
+          }
+          return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
+        })();
 
   // 🐞 DEBUG: log the final request URL in the server console
   console.log("[Strapi]", url);
@@ -485,6 +490,7 @@ export async function getNewsBySlug(slug: string, locale: Locale) {
   console.log('[news:detail:req]', { slug, locale, NEWS_IS_LOCALIZED, qs: qp.toString() });
 
   try {
+
     const rows = await strapiFetch<{ data: any[] } | any[]>(
       `/api/news-items?${qp.toString()}`
     );
