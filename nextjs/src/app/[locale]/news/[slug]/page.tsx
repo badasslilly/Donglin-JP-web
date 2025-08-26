@@ -9,9 +9,10 @@ import Link from 'next/link';
 export default async function NewsDetail({
   params,
 }: {
-  params: Promise<{ locale: Locale; slug: string }>;
+  params: { locale: Locale; slug: string };
 }) {
-  const { locale, slug } = await params;
+  const { locale, slug } =  params;
+  
   const detail = await getNewsBySlug(slug, locale);
   if (!detail) notFound();
 

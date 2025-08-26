@@ -13,11 +13,12 @@ export const metadata: Metadata = { title: 'お知らせ一覧' };
 export default async function NewsIndex({
   params,
 }: {
-  params: Promise<{ locale: Locale }>;
+  params: { locale: Locale }; 
 }) {
 
-  const { locale } = await params;
+  const { locale } = params;
   const news = await getNewsList(locale);
+  
   console.log('[NewsIndex] news', news); 
 
   return (
