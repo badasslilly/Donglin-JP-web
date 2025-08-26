@@ -1,3 +1,6 @@
 node_modules
 nextjs/public/video/东林道风形象片-《思归》4k最终版.mp4
 nextjs/public/video/intro.mp4
+strapi/.env
+nextjs/.env
+strapi/.tmp/

@@ -1,4 +1,5 @@
 import { BlocksContent } from "@strapi/blocks-react-renderer";
+import { notFound } from "next/navigation";
 import qs from "qs";
 import { cache } from "react";
 
@@ -465,32 +466,44 @@ export interface NewsDetail {
   body : any;            // BlocksContent（型を合わせて下さい）
 }
 
-export async function getNewsBySlug(
-  slug: string,
-  locale: 'ja' | 'en'
-): Promise<NewsDetail | null> {
-  const url =
-    `${API}/api/news-items?locale=${locale}` +
-    `&filters[slug][$eq]=${slug}`;
+const NEWS_IS_LOCALIZED = false;
+export async function getNewsBySlug(slug: string, locale: Locale) {
+  const qp = new URLSearchParams({
+    'filters[slug][$eq]': slug,
+    'populate': '*',
+  });
+  if (NEWS_IS_LOCALIZED) qp.set('locale', locale);
 
-  const res  = await fetch(url, { next: { revalidate: 60 } });
-  const json = await res.json();
-  if (!json.data?.length) return null;
+  console.log('[news:detail:req]', { slug, locale, NEWS_IS_LOCALIZED, qs: qp.toString() });
 
-  /* フラットでも attributes でも対応 */
-  const row   = json.data[0];
-  const attrs: any = 'attributes' in row ? row.attributes : row;
+  try {
+    const rows = await strapiFetch<{ data: any[] } | any[]>(
+      `/api/news-items?${qp.toString()}`
+    );
 
-  return {
-    title: attrs.title,
-    date : attrs.date,
-    slug : attrs.slug,
-    body : attrs.body as BlocksContent,
-  };
+    const list: any[] = Array.isArray(rows) ? rows : (rows.data ?? []);
+    if (!list.length) return null;
+
+    const row   = list[0];
+    const attrs = row.attributes ?? row;
+
+    return {
+      title: attrs.title,
+      date : attrs.date,
+      slug : attrs.slug,
+      body : attrs.body,
+    };
+  } catch (e: any) {
+    console.error('[news:detail:error]', {
+      slug, locale, status: e?.status, url: e?.url,
+      bodyPreview: (e?.body || '').slice(0, 500),
+      message: e?.message,
+    });
+    if (e?.status === 404) return notFound();
+    throw e;
+  }
 }
 
-
-const STRAPI = process.env.STRAPI_API_URL ?? 'http://localhost:1337'
 
 export async function getPageContentBySlug(slug: string, locale: string) {
   const query = qs.stringify(
@@ -508,7 +521,7 @@ export async function getPageContentBySlug(slug: string, locale: string) {
     { encodeValuesOnly: true }
   )
 
-  const res = await fetch(`${STRAPI}/api/page-contents?${query}`, {
+  const res = await fetch(`${API}/api/page-contents?${query}`, {
     next: { revalidate: 60 },
   })
   if (!res.ok) throw new Error('Strapi fetch failed')
