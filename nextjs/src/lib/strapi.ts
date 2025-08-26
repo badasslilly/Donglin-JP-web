@@ -6,8 +6,10 @@ import { cache } from "react";
 /* ------------------------------------------------------------------ */
 /*  ENV – set these in .env                                           */
 /* ------------------------------------------------------------------ */
-const API   = process.env.NEXT_PUBLIC_STRAPI_URL!;        // e.g. http://127.0.0.1:1337
+const PUBLIC   = process.env.NEXT_PUBLIC_STRAPI_URL!;
+const INTERNAL = process.env.STRAPI_INTERNAL_URL;         // e.g. http://127.0.0.1:1337
 const TOKEN = process.env.STRAPI_TOKEN!;      // read-only API token
+const isServer = typeof window === 'undefined';
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
@@ -22,7 +24,13 @@ function toQuery(obj: object) {
 
 /* helper ----------------------------------------------------------- */
 export async function strapiFetch<T = unknown>(path: string): Promise<T> {
-  const url = `${API}${path}`;
+  const url =
+    /^https?:\/\//.test(path)
+      ? path
+      : `${isServer ? INTERNAL : PUBLIC}${path.startsWith('/') ? '' : '/'}${path}`;
+
+  // Debug log
+  console.log('[Strapi]', url);
 
   // 🐞 DEBUG: log the final request URL in the server console
   console.log("[Strapi]", url);
@@ -38,7 +46,7 @@ export async function strapiFetch<T = unknown>(path: string): Promise<T> {
 
 export function mediaURL(path?: string | null): string {
   if (!path) return "";
-  return path.startsWith("http") ? path : `${API}${path}`;
+  return path.startsWith("http") ? path : `${PUBLIC}${path}`;
 }
 
 /** Accept both Strapi media shapes: flat {url} and nested {data.attributes.url} */
@@ -521,7 +529,7 @@ export async function getPageContentBySlug(slug: string, locale: string) {
     { encodeValuesOnly: true }
   )
 
-  const res = await fetch(`${API}/api/page-contents?${query}`, {
+  const res = await fetch(`${PUBLIC}/api/page-contents?${query}`, {
     next: { revalidate: 60 },
   })
   if (!res.ok) throw new Error('Strapi fetch failed')
