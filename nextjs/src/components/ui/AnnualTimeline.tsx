@@ -68,27 +68,12 @@ export default function AnnualTimeline({
                 className='absolute left-4 top-0 bottom-0 w-px bg-gray-300 md:hidden'
               />
               {list.map((ev, idx) => {
-                const isFirst = idx === 0
-                const isLast = idx === list.length - 1
                 return (
                   <li
                     key={ev.id}
                     className='relative transition-colors hover:bg-[#f8f6fd] pl-10 md:pl-0 '
                   >
-                    {/* Desktop-only row segments (mobile uses the spine above) */}
-                    {!isFirst && (
-                      <span
-                        aria-hidden
-                        className='hidden md:block absolute left-0 top-0 h-6 w-px bg-gray-300'
-                      />
-                    )}
-                    {!isLast && (
-                      <span
-                        aria-hidden
-                        className='hidden md:block absolute left-0 top-6 bottom-0 w-px bg-gray-300'
-                      />
-                    )}
-                    {/* Bullet: centered on the line (mobile: left-4 spine; desktop: month divider) */}
+                    
                     <span
                       aria-hidden
                       className='absolute left-4 md:left-[-8] top-6 md:top-11 h-2 w-2 -translate-x-1/2 rounded-full bg-gray-600'
