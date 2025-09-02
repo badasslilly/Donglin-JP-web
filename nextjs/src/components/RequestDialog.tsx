@@ -94,7 +94,7 @@ export default function RequestDialog({
       address = buildAddressString(fd, locale)
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch('/api/offering-request', {
         method: 'POST',
@@ -107,28 +107,26 @@ export default function RequestDialog({
           email,
           address,
           note: note || undefined,
-          // ▼ was: locale
-          localization: locale, // <— send this to Strapi
+          localization: locale,     // important: you renamed to "localization"
         }),
-      })
-
-      const json = await res.json().catch(() => null)
-      if (!res.ok || !json?.ok) {
-        throw new Error(
-          json?.error ||
-            (locale === 'ja' ? '送信に失敗しました。' : 'Submission failed.')
-        )
+      });
+  
+      const raw = await res.text();
+      let data: any = null;
+      try { data = raw ? JSON.parse(raw) : null; } catch {}
+  
+      if (!res.ok || !data?.ok) {
+        const msg =
+          data?.error ||
+          `${res.status} ${res.statusText} — ${raw?.slice(0, 200) || 'no body'}`;
+        throw new Error(msg);
       }
-
-      // success (no code returned right now)
-      setDone({})
+  
+      setDone({});
     } catch (err: any) {
-      setError(
-        err?.message ??
-          (locale === 'ja' ? '送信に失敗しました。' : 'Submission failed.')
-      )
+      setError(err?.message || (locale === 'ja' ? '送信に失敗しました。' : 'Submission failed.'));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
