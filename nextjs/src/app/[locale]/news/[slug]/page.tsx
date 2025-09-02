@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import HeroHeader            from '@/components/ui/HeroHeader';
 import BlockRendererClient   from '@/components/BlockRendererClient';  // ← 追加
 import { getNewsBySlug, Locale } from '@/lib/strapi';
