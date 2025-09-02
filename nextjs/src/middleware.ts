@@ -1,11 +1,31 @@
+// middleware.ts
 import createMiddleware from 'next-intl/middleware';
-import {routing} from './i18n/routing';
- 
-export default createMiddleware(routing);
- 
+import { NextRequest, NextResponse } from 'next/server';
+
+const intl = createMiddleware({
+  locales: ['ja', 'en'],
+  defaultLocale: 'ja',
+  // localePrefix: 'always' | 'as-needed'  // your choice
+});
+
+export default function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // ✅ Skip API/static paths so they are NOT redirected to /ja/...
+  if (
+    pathname.startsWith('/site-api') ||
+    pathname.startsWith('/api') ||          // if you have other APIs
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon') ||
+    pathname.includes('.')                  // files like /robots.txt, /images/foo.png
+  ) {
+    return NextResponse.next();
+  }
+
+  return intl(req);
+}
+
+// Only run middleware for real pages
 export const config = {
-  // Match all pathnames except for
-  // - … if they start with `/api`, `/trpc`, `/_next` or `/_vercel`
-  // - … the ones containing a dot (e.g. `favicon.ico`)
-  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
+  matcher: ['/((?!site-api|api|_next|.*\\..*).*)'],
 };
