@@ -76,16 +76,16 @@ export default function AnnualTimeline({
                     
                     <span
                       aria-hidden
-                      className='absolute left-4 md:left-[-8] top-6 md:top-11 h-2 w-2 -translate-x-1/2 rounded-full bg-gray-600'
+                      className='absolute left-4 md:left-[-8px] top-6 md:top-11 h-2 w-2 -translate-x-1/2 rounded-full bg-gray-600'
                     />
                     <Link
                       href={`/events/${ev.id}`}
-                      className='grid grid-cols-1 items-stretch gap-y-3 gap-x-8 py-4 md:grid-cols-[5rem_1fr_auto]'
+                      className='grid grid-cols-1 items-stretch gap-y-3 gap-x-8 py-4 md:grid-cols-[10.5rem_1fr_auto]'
                     >
                       {/* date column */}
-                      <div className='flex items-center whitespace-nowrap md:pl-3'>
+                      <div className='flex items-center whitespace-nowrap md:pl-5'>
                         <time className='text-base text-gray-900'>
-                          {formatDate(ev)}
+                          {formatDate(ev, locale)}
                         </time>
                       </div>
                       {/* info block */}
@@ -131,7 +131,7 @@ export default function AnnualTimeline({
                     <span
                       aria-hidden
                       className='pointer-events-none absolute bottom-0 right-0 h-px bg-gray-200
-               left-10 md:left-1' // phone: align with pl-10; desktop: after the 5rem date column
+               left-10 md:left-0' // phone: align with pl-10; desktop: after the 5rem date column
                     />
                   </li>
                 )
@@ -147,9 +147,24 @@ export default function AnnualTimeline({
 /* -------------------------------------------------------- */
 /* Helper                                                   */
 /* -------------------------------------------------------- */
-function formatDate(ev: AnnualEvent) {
-  const from = dayjs(ev.date_start).format('D日')
-  return ev.date_end && ev.date_end !== ev.date_start
-    ? `${from}〜${dayjs(ev.date_end).format('D日')}`
-    : from
+function formatDate(ev: AnnualEvent, locale: string = 'ja') {
+  const start = dayjs(ev.date_start)
+  const end   = ev.date_end ? dayjs(ev.date_end) : null
+
+  // single-day
+  if (!end || end.isSame(start, 'day')) {
+    return locale === 'ja' ? start.format('D日') : start.format('D')
+  }
+
+  // build end label: add month if month changed; add year if year changed
+  const endLabel =
+    !end.isSame(start, 'year')
+      ? (locale === 'ja' ? end.format('YYYY年M月D日') : end.format('YYYY MMM D'))
+      : !end.isSame(start, 'month')
+        ? (locale === 'ja' ? end.format('M月D日') : end.format('MMM D'))
+        : (locale === 'ja' ? end.format('D日') : end.format('D'))
+
+  const startLabel = locale === 'ja' ? start.format('D日') : start.format('D')
+  return `${startLabel}〜${endLabel}`
 }
+
