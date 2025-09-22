@@ -453,16 +453,20 @@ export async function getNewsList(locale: Locale): Promise<NewsBrief[]> {
   const q = toQuery({
     locale,
     fields: ['title', 'slug', 'date'],
-    sort:   ['date:desc'],
-    // remove pageSize if you want **all** items,
-    //   otherwise keep or change the number
+    sort: ['date:desc'],
   });
 
-  // 1️⃣  strapiFetch already gives you the array in .data,
-  //     so receive it directly
-  const list = await strapiFetch<any[]>(`/api/news-items?${q}`);
+  let list = await strapiFetch<any[]>(`/api/news-items?${q}`);
 
-  // 2️⃣  flatten whether Strapi sends attributes or not
+  if (!list?.length) {
+    // fallback to default locale if empty
+    const qFallback = toQuery({
+      fields: ['title', 'slug', 'date'],
+      sort: ['date:desc'],
+    });
+    list = await strapiFetch<any[]>(`/api/news-items?${qFallback}`);
+  }
+
   return list.map((n) => ({
     slug : n.slug  ?? n.attributes?.slug,
     title: n.title ?? n.attributes?.title,
@@ -471,41 +475,65 @@ export async function getNewsList(locale: Locale): Promise<NewsBrief[]> {
 }
 
 
+
 /* ---------- News detail ---------------------------------------- */
 export interface NewsDetail {
   title: string;
   date : string;
   slug : string;
-  body : any;            // BlocksContent（型を合わせて下さい）
+  body : any; // BlocksContent
 }
 
-const NEWS_IS_LOCALIZED = false;
+const NEWS_IS_LOCALIZED = true;
+
 export async function getNewsBySlug(slug: string, locale: Locale) {
+  // 1) Try to find the entry in the current locale by slug
   const qp = new URLSearchParams({
-    'filters[slug][$eq]': slug,
+    'filters[$or][0][slug][$eq]': slug,                         // direct match in this locale
+    'filters[$or][1][localizations][slug][$eq]': slug,          // or a localized sibling has this slug
+    'locale': locale,                                           // ← key: search in current locale
     'populate': '*',
   });
-  if (NEWS_IS_LOCALIZED) qp.set('locale', locale);
-
-  console.log('[news:detail:req]', { slug, locale, NEWS_IS_LOCALIZED, qs: qp.toString() });
 
   try {
-
     const rows = await strapiFetch<{ data: any[] } | any[]>(
       `/api/news-items?${qp.toString()}`
     );
 
     const list: any[] = Array.isArray(rows) ? rows : (rows.data ?? []);
-    if (!list.length) return null;
+    if (list.length > 0) {
+      const row   = list[0];
+      const attrs = row.attributes ?? row;
+      return {
+        title: attrs.title,
+        date : attrs.date,
+        slug : attrs.slug,
+        body : attrs.body,
+      };
+    }
 
-    const row   = list[0];
-    const attrs = row.attributes ?? row;
+    // 2) Fallback: look up the default-locale record by slug (no locale param)
+    const qpFallback = new URLSearchParams({
+      'filters[$or][0][slug][$eq]': slug,
+      'filters[$or][1][localizations][slug][$eq]': slug,
+      'populate': '*',
+    });
+
+    const fbRows = await strapiFetch<{ data: any[] } | any[]>(
+      `/api/news-items?${qpFallback.toString()}`
+    );
+    const fbList: any[] = Array.isArray(fbRows) ? fbRows : (fbRows.data ?? []);
+
+    if (!fbList.length) return null;
+
+    const fbRow   = fbList[0];
+    const fbAttrs = fbRow.attributes ?? fbRow;
 
     return {
-      title: attrs.title,
-      date : attrs.date,
-      slug : attrs.slug,
-      body : attrs.body,
+      title: fbAttrs.title,
+      date : fbAttrs.date,
+      slug : fbAttrs.slug,
+      body : fbAttrs.body,
     };
   } catch (e: any) {
     console.error('[news:detail:error]', {
@@ -513,11 +541,10 @@ export async function getNewsBySlug(slug: string, locale: Locale) {
       bodyPreview: (e?.body || '').slice(0, 500),
       message: e?.message,
     });
-    if (e?.status === 404) return notFound();
+    if (e?.status === 404) return null;
     throw e;
   }
 }
-
 
 export async function getPageContentBySlug(slug: string, locale: string) {
   const query = qs.stringify(
