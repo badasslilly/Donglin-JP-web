@@ -34,6 +34,17 @@ export default async function Highlights({
           </h2>
         </div>
 
+        <div className='mx-auto max-w-5xl px-4 '>
+        {video && (
+          <VideoBlock
+            title={video.title}
+            description={video.description}
+            videoUrl={video.videoUrl}
+            posterUrl={video.posterUrl}
+          />
+        )}
+      </div>
+
         {/* ── Dynamic sections ───────────────────────────── */}
         {data.sections?.map((section: any) => (
           <div key={section.id}>
@@ -60,16 +71,7 @@ export default async function Highlights({
         ))}
         {/* </div> */}
       </section>
-      <div className='mx-auto max-w-5xl px-4 '>
-        {video && (
-          <VideoBlock
-            title={video.title}
-            description={video.description}
-            videoUrl={video.videoUrl}
-            posterUrl={video.posterUrl}
-          />
-        )}
-      </div>
+      
     </main>
   )
 }
