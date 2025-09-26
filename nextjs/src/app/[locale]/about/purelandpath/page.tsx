@@ -20,29 +20,29 @@ type PageProps = { params: { locale: Locale } }
 export default async function PurelandPathPage({ params }: PageProps) {
   const locale = params.locale ?? 'ja'
 
-  /* fetch & flatten */
   const { section_block } = await getPurelandPathPage(locale)
 
   return (
     <main className='mx-auto max-w-6xl space-y-24 px-4 py-16'>
-      {section_block.map((sec) => (
+      {section_block.map((sec, secIdx) => (
         <section key={sec.id} className='space-y-10'>
-          {/* ── vertical bookmark headline for the whole section ───────── */}
           {sec.headline && <SectionHeading title={sec.headline} />}
 
-          {/* ── grid of BorderBoxes ───────────────────────────────────── */}
           <div className='grid grid-cols-1 gap-10 pt-10'>
             {sec.content.map((item, idx) => (
+              
               <BorderBox
                 key={item.id}
                 title={item.headline ?? ''}
                 side={idx % 2 === 0 ? 'left' : 'right'}
+                locale={locale}
               >
-                {/* side-by-side wrapper – stacks on mobile, row on ≥ md  */}
+                {/* side-by-side wrapper – stacks on mobile, row on ≥ md */}
                 <div
                   className={clsx(
-                    'flex flex-col gap-6 md:flex-row md:items-center',
-                    idx % 2 === 1 && 'md:flex-row-reverse' // odd: image on the right
+                    'flex flex-col gap-6 md:flex-row',  // ← center only for EN
+                    idx % 2 === 1 && 'md:flex-row-reverse',
+                    
                   )}
                 >
                   {/* image */}
@@ -52,7 +52,10 @@ export default async function PurelandPathPage({ params }: PageProps) {
                       alt={item.headline ?? ''}
                       width={800}
                       height={600}
-                      className='h-auto w-full md:w-1/2 rounded-md object-cover'
+                      className={clsx(
+                        'h-auto w-full md:w-1/2 rounded-md object-cover',
+                        secIdx === 1 && 'self-center'               // ← stick to top for JA
+                      )}
                     />
                   )}
 
@@ -60,12 +63,8 @@ export default async function PurelandPathPage({ params }: PageProps) {
                   <div
                     className={clsx(
                       'md:w-1/2',
-                      // 🔽 tweak the three dimensions here
-                      'leading-6', // line-height 2rem (32 px)
-                      'space-y-4', // 1 rem between <p>, <ul>, <h*> …
-                      'tracking-wide',
-                      'p-7',
-                       // a little extra letter-spacing
+                      'leading-6 space-y-4 tracking-wide p-7',
+                      'flex flex-col justify-center'
                     )}
                   >
                     {typeof item.intro === 'string' ? (
@@ -73,9 +72,7 @@ export default async function PurelandPathPage({ params }: PageProps) {
                         {item.intro}
                       </p>
                     ) : Array.isArray(item.intro) ? (
-                      <BlockRendererClient
-                        content={item.intro as BlocksContent}
-                      />
+                      <BlockRendererClient content={item.intro as BlocksContent} />
                     ) : null}
                   </div>
                 </div>
@@ -87,3 +84,4 @@ export default async function PurelandPathPage({ params }: PageProps) {
     </main>
   )
 }
+

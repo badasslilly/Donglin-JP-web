@@ -45,6 +45,7 @@ export default async function WondersPage({ params }: PageProps) {
               <BorderBox
                 title={sec.headline ?? ''}
                 side={imageOnRight ? 'right' : 'left'}
+                locale={locale}  
               >
                 {/* stack on mobile; row on ≥ md; alternate left/right */}
                 <div

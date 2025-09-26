@@ -13,6 +13,7 @@ interface VideoBlockProps {
   videoUrl: string // YouTube share URL or .mp4
   posterUrl: string
   flip?: boolean // image-right on desktop when true
+  locale: 'ja' | 'en'
 }
 
 export default function VideoBlock({
@@ -21,9 +22,9 @@ export default function VideoBlock({
   videoUrl,
   posterUrl,
   flip = false,
+  locale = 'ja',
 }: VideoBlockProps) {
   const [open, setOpen] = useState(false)
-  const isYouTube = /youtu\.?be/.test(videoUrl)
 
   const imgSide = flip ? 'lg:order-2' : 'lg:order-1'
   const textSide = flip ? 'lg:order-1' : 'lg:order-2'
@@ -36,7 +37,7 @@ export default function VideoBlock({
     return `https://www.youtube.com/embed/${idMatch}`;
   }
   const embedSrc = toYouTubeEmbed(videoUrl) + '?autoplay=1'
-  
+  const isEN = locale === 'en'
 
   return (
     <>
@@ -78,7 +79,7 @@ export default function VideoBlock({
             onClick={() => setOpen(true)}
             className='inline-flex w-max items-center gap-4 rounded-full border-2 border-black px-8 py-3 text-sm font-bold bg-[#e7e2d0]/80 transition hover:bg-black hover:text-white cursor-pointer'
           >
-            動画を見る
+            {isEN ? 'Watch the video':'動画を見る'}
             <span className='inline-block transition group-hover:translate-x-1'>
               →
             </span>

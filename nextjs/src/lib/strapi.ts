@@ -407,24 +407,34 @@ export interface WondersPageData {
   content_block: WonderContent[];
 }
 
+
 export async function getWondersPage(locale: Locale): Promise<WondersPageData> {
   const q = toQuery({
     locale,
-    fields:   ["page_headline", "intro"],  
+    fields: ["page_headline", "intro"],
     populate: {
-      // populate the media field on the repeatable component
-      content_block: { populate: ['image'] },
+      content_block: { populate: ["image"] },
     },
-  });
+  })
 
-  // strapiFetch returns `.data`; single-type => { id, attributes }
-  const raw = await strapiFetch<any>(`/api/wonders-page?${q}`);
-  const attrs = 'attributes' in raw ? raw.attributes : raw;
+  const path = `/api/wonders-page?${q}`
+  const base =
+    process.env.NEXT_PUBLIC_STRAPI_URL?.replace(/\/+$/, "") ?? "" // e.g. http://192.168.8.79
+  const url = `${base}${path}`
+
+  // 👇 print the API endpoint being fetched
+  // (toggle as you like: always on, only in dev, or behind an env flag)
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[Strapi]", url)
+  }
+  // or: if (process.env.NEXT_PUBLIC_DEBUG === "1") console.log("[Strapi]", url)
+
+  // do the fetch (strapiFetch expects a path)
+  const raw = await strapiFetch<any>(path)
+  const attrs = "attributes" in raw ? raw.attributes : raw
 
   const getImageUrl = (img: any): string | undefined =>
-    img?.url ??
-    img?.data?.attributes?.url ??
-    undefined;
+    img?.url ?? img?.data?.attributes?.url ?? undefined
 
   const content_block: WonderContent[] = (attrs.content_block ?? []).map(
     (item: any): WonderContent => ({
@@ -433,13 +443,15 @@ export async function getWondersPage(locale: Locale): Promise<WondersPageData> {
       intro: item.intro,
       image: getImageUrl(item.image) ? { url: getImageUrl(item.image)! } : undefined,
     })
-  );
+  )
 
-  return { 
+  return {
     page_headline: attrs.page_headline ?? null,
     intro: attrs.intro ?? null,
-    content_block };
+    content_block,
+  }
 }
+
 
 
 /* ---------- News list ------------------------------ */
@@ -546,31 +558,32 @@ export async function getNewsBySlug(slug: string, locale: Locale) {
   }
 }
 
+
 export async function getPageContentBySlug(slug: string, locale: string) {
   const query = qs.stringify(
     {
       filters: { slug: { $eq: slug } },
       locale,
+      fields: ['title'],
       populate: {
-        sections: {
-          populate: {
-            blocks: { populate: ['image'] },
-          },
-        },
+        sections: { populate: { blocks: { populate: ['image'] } } },
       },
     },
     { encodeValuesOnly: true }
   )
 
-  const res = await fetch(`${PUBLIC}/api/page-contents?${query}`, {
-    next: { revalidate: 60 },
-  })
+  const url = `${PUBLIC}/api/page-contents?${query}`
+
+  // 👇 print the access URL (server console)
+  console.log('[Strapi][getPageContentBySlug]', decodeURI(url))
+
+  const res = await fetch(url, { next: { revalidate: 60 } })
   if (!res.ok) throw new Error('Strapi fetch failed')
 
   const json = await res.json()
-  // v5 returns flattened objects (no .attributes)
   return json.data?.[0] ?? null
 }
+
 
 /* ------------------------------------------ */
 /*  lib/strapi.ts (or wherever the helper is) */

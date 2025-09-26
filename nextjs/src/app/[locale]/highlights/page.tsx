@@ -30,21 +30,20 @@ export default async function Highlights({
         <div className='mb-8 flex items-center gap-3 mx-auto max-w-6xl px-4 py-10'>
           <span className='text-4xl'>☘</span>
           <h2 className='text-3xl font-bold tracking-wide sm:text-4xl'>
-            奇跡の東林大仏
+            {data.title}
           </h2>
         </div>
-
         <div className='mx-auto max-w-5xl px-4 '>
-        {video && (
-          <VideoBlock
-            title={video.title}
-            description={video.description}
-            videoUrl={video.videoUrl}
-            posterUrl={video.posterUrl}
-          />
-        )}
-      </div>
-
+          {video && (
+            <VideoBlock
+              title={video.title}
+              description={video.description}
+              videoUrl={video.videoUrl}
+              posterUrl={video.posterUrl}
+              locale={params.locale}
+            />
+          )}
+        </div>
         {/* ── Dynamic sections ───────────────────────────── */}
         {data.sections?.map((section: any) => (
           <div key={section.id}>
@@ -53,17 +52,16 @@ export default async function Highlights({
               title={section.section_title}
               bgClassName='mx-auto max-w-6xl bg-[#f6f3e7]/70'
             />
-
             {section.blocks?.map((b: any, idx: number) => (
               <div key={b.id ?? b.subtitle} className=''>
                 <BlockRow
-                  key={b.id ?? idx}
-                  index={idx + 1} // 01. 02. …
+                  index={idx + 1}
                   title={b.title}
                   subtitle={b.subtitle}
                   imageUrl={b.image?.url}
                   body={b.intro ?? b.body ?? ''}
-                  flip={idx % 2 === 1} // alternate left/right
+                  flip={idx % 2 === 1}
+                  locale={locale} // ← add this
                 />
               </div>
             ))}
@@ -71,7 +69,6 @@ export default async function Highlights({
         ))}
         {/* </div> */}
       </section>
-      
     </main>
   )
 }

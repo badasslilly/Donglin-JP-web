@@ -1,12 +1,9 @@
 /** @format */
 
-import HeroHeader from '@/components/ui/HeroHeader'
-import PageTabs from '@/components/ui/PageTabs'
 import { shippori } from '@/styles/fonts'
 import AnnualTimeline, { AnnualEvent } from '@/components/ui/AnnualTimeline'
 import MonthMenu from '@/components/ui/MonthMenu'
 import Legend from '@/components/ui/Legend'
-import EventTabs from '@/components/ui/EventTabs'
 import { getAllEvents, Locale } from '@/lib/strapi'
 
 export function toMonthNumber(raw?: string | null): number | undefined {
