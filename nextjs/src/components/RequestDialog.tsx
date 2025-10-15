@@ -107,7 +107,7 @@ export default function RequestDialog({
           email,
           address,
           note: note || undefined,
-          localization: locale,     // important: you renamed to "localization"
+          locale,     // important: you renamed to "localization"
         }),
       });
   

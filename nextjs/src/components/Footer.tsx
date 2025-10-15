@@ -2,10 +2,11 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Locale } from './SiteNav'
+
 import { shippori } from '@/styles/fonts'
 import { Instagram, Facebook, XIcon } from 'lucide-react'
 import { withLineBreaks } from '@/utils/text'
+import { Locale } from '@/lib/strapi'
 
 interface Social {
   platform: string
@@ -20,11 +21,13 @@ interface Props {
   address: string
   copyright: string
   mapLabel: string
-  logoUrl: string
+  logoUrl: string | null
   socials: Social[]
 }
 
 export function Footer(data: Props) {
+  const rawLogo = (data.logoUrl ?? '').trim()
+  const logoSrc = rawLogo.length > 0 ? rawLogo : null
   return (
     <footer className={`bg-[#f5f5f3] py-20 text-black ${shippori.className}`}>
       <div className='mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-3 lg:gap-20'>
@@ -104,13 +107,15 @@ export function Footer(data: Props) {
           </Link>
 
           <div className='flex justify-center'>
-            <Image
-              src={data.logoUrl}
-              alt='東林寺'
-              width={140}
-              height={140}
-              className='h-auto w-32'
-            />
+          {logoSrc && (
+              <Image
+                src={logoSrc}
+                alt='東林寺'
+                width={140}
+                height={140}
+                className='h-auto w-32'
+              />
+            )}
           </div>
 
           <p className='[writing-mode:vertical-rl] whitespace-pre-line text-base tracking-widest'>

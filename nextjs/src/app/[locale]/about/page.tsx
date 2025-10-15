@@ -2,8 +2,8 @@
 import SectionHeading from '@/components/ui/SectionHeading'
 import Table, { HistoryGroup } from '@/components/ui/Table'
 import VerticalBookmark from '@/components/ui/VerticalBookmark'
-import { getAboutPage, mediaURL } from '@/lib/strapi'
-import type { Locale } from '@/lib/strapi'
+import { getAboutPage, mediaURL, Locale } from '@/lib/strapi'
+
 import Image from 'next/image'
 import clsx from 'clsx'
 

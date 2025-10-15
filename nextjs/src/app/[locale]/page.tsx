@@ -21,6 +21,7 @@ import {
   mediaURL,
   resolveMediaUrl,        //  ← NEW
 } from '@/lib/strapi'
+import HeroVideo from '@/components/ui/HeroVideo'
 
 export default async function LocaleHome({
   params,
@@ -61,6 +62,7 @@ export default async function LocaleHome({
   const t = (jp: string, en: string) => (locale === 'ja' ? jp : en)
 
   return (
+
     <main className={`relative overflow-x-hidden ${shippori.className}`}>
        <header className='h-20 z-0 border-b border-black/10 bg-white/80 backdrop-blur-md'>
         <div className='mx-auto flex max-w-7xl items-center justify-between px-4 py-3'>
@@ -84,6 +86,16 @@ export default async function LocaleHome({
           </BorderWrapper>
         </div>
       </section>
+      {/* <HeroVideo 
+        src={heroVideo}
+        poster="/videos/home-hero-poster.jpg"
+        className="mx-auto max-w-screen-2xl"
+        splashTitle="東林寺 Dōnglín Monastery"
+        splashCrestSrc="/images/crest-donglin.svg"
+        splashOncePerSession
+        maxSplashMs={2400}
+        splashDurations={{ intro: 500, hold: 700, doors: 900, fade: 300 }}
+      /> */}
 
       <HomeBottomNav />
 
