@@ -1,7 +1,13 @@
-/**
- * offering-request router
- */
-
-import { factories } from '@strapi/strapi';
-
-export default factories.createCoreRouter('api::offering-request.offering-request');
+// strapi/src/api/offering-request/routes/custom-offering-request.ts
+export default {
+  routes: [
+    {
+      method: 'POST',
+      path: '/offering-request/submit',
+      handler: 'offering-request.submit',
+      config: {
+        auth: false, // bypass standard auth
+      },
+    },
+  ],
+}
