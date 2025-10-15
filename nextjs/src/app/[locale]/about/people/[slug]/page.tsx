@@ -1,3 +1,4 @@
+// src/app/[locale]/about/people/[slug]/page.tsx
 import Image from "next/image";
 import Link  from "next/link";
 import { getPersonBySlug, mediaURL, Locale } from "@/lib/strapi";
@@ -9,14 +10,17 @@ const unwrap = <T extends Record<string, any>>(x: any): T =>
 /*  Individual profile                                             */
 /* -------------------------------------------------------------- */
 interface PageProps {
-  params:       { slug: string };
-  searchParams?: { locale?: Locale };
+  // In Next 15 (App Router), these can be Promises during server build
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ locale?: Locale }>;
 }
 
 export default async function PersonPage(props: PageProps) {
-  
-  const locale = (props.searchParams?.locale as Locale) ?? "ja";
-  const raw    = await getPersonBySlug(props.params.slug, locale);
+  const { slug } = await props.params;
+  const sp = props.searchParams ? await props.searchParams : undefined;
+
+  const locale = (sp?.locale as Locale) ?? "ja";
+  const raw    = await getPersonBySlug(slug, locale);
   const p      = unwrap(raw);
 
   return (
@@ -50,7 +54,7 @@ export default async function PersonPage(props: PageProps) {
               const cat = unwrap<{ id: number; title: string; slug: string }>(c);
               return (
                 <li key={cat.id}>
-                  <Link href={`/people?category=${cat.slug}`} className="underline">
+                  <Link href={`/${locale}/about/people?category=${cat.slug}`} className="underline">
                     {cat.title}
                   </Link>
                 </li>
@@ -69,7 +73,7 @@ export default async function PersonPage(props: PageProps) {
               const r = unwrap<{ id: number; name: string; slug: string }>(rp);
               return (
                 <li key={r.id}>
-                  <Link href={`/people/${r.slug}`} className="underline">
+                  <Link href={`/${locale}/about/people/${r.slug}`} className="underline">
                     {r.name}
                   </Link>
                 </li>
@@ -80,7 +84,7 @@ export default async function PersonPage(props: PageProps) {
       ) : null}
 
       <div className="mt-10">
-        <Link href="/people" className="underline">
+        <Link href={`/${locale}/about/people`} className="underline">
           ← 図鑑トップへ戻る
         </Link>
       </div>
