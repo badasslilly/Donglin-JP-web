@@ -14,14 +14,12 @@ import BlockRendererClient from '@/components/BlockRendererClient'
 import BorderBox from '@/components/ui/BorderBox'
 import { getPurelandPathPage, mediaURL, type Locale } from '@/lib/strapi'
 import clsx from 'clsx'
-import type { WithAsyncRequest } from '@/utils/next-async-props'
 
-type PagePropsSync = {
-  params: { locale: Locale }
-  // include if you ever read query string values on this page
-  searchParams?: Record<string, string | string[] | undefined>
+
+type PageProps = {
+  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
-type PageProps = WithAsyncRequest<PagePropsSync>
 
 export default async function PurelandPathPage(props: PageProps) {
   const { locale } = await props.params

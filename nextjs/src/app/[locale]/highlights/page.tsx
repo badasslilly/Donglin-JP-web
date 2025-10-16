@@ -4,11 +4,13 @@ import SectionHeading from '@/components/ui/SectionHeading'
 import BlockRow from '@/components/ui/BlockRow'
 import VideoBlock from '@/components/ui/VideoBlock'
 import { getHighlightsShell, getPageContentBySlug } from '@/lib/strapi'
-import type { WithAsyncRequest } from '@/utils/next-async-props'
+
 
 // Added by fix-async-props codemod
-type PagePropsSync = { params?: any; searchParams?: any };
-type PageProps = WithAsyncRequest<PagePropsSync>
+type PageProps = {
+  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
 
 
 export default async function Highlights(props: PageProps) {

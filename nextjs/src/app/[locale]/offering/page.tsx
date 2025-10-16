@@ -4,11 +4,14 @@ import HeroHeader from "@/components/ui/HeroHeader";
 import { getOfferingItems } from "@/lib/offerings";
 import { getDictionary, type Locale } from "@/i18n/get-dictionary";
 import OfferingGrid from "@/components/ui/OfferingGrid";
-import type { WithAsyncRequest } from '@/utils/next-async-props'
+
 
 // Added by fix-async-props codemod
-type PagePropsSync = { params?: any; searchParams?: any };
-type PageProps = WithAsyncRequest<PagePropsSync>
+type PageProps = {
+  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
 
 
 export default async function OfferingsPage(props: PageProps) {

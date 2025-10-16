@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link  from "next/link";
 import { getPersonBySlug, mediaURL, Locale } from "@/lib/strapi";
-import type { WithAsyncRequest } from '@/utils/next-async-props'
+
 
 const unwrap = <T extends Record<string, any>>(x: any): T =>
   ("attributes" in x ? { id: x.id, ...x.attributes } : x) as T;
@@ -10,8 +10,10 @@ const unwrap = <T extends Record<string, any>>(x: any): T =>
 /* -------------------------------------------------------------- */
 /*  Individual profile                                             */
 /* -------------------------------------------------------------- */
-type PagePropsSync = { params?: any; searchParams?: any };
-type PageProps = WithAsyncRequest<PagePropsSync>
+type PageProps = {
+  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
 
 export default async function PersonPage(props: PageProps) {
   const { slug } = await props.params;

@@ -6,11 +6,14 @@ import { getNewsBySlug, Locale } from '@/lib/strapi';
 import { shippori } from '@/styles/fonts';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import type { WithAsyncRequest } from '@/utils/next-async-props'
+
 
 // Added by fix-async-props codemod
-type PagePropsSync = { params?: any; searchParams?: any };
-type PageProps = WithAsyncRequest<PagePropsSync>
+type PageProps = {
+  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
 
 
 export default async function NewsDetail(props: PageProps) {

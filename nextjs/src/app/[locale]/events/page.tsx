@@ -5,11 +5,14 @@ import AnnualTimeline, { AnnualEvent } from '@/components/ui/AnnualTimeline'
 import MonthMenu from '@/components/ui/MonthMenu'
 import Legend from '@/components/ui/Legend'
 import { getAllEvents, Locale } from '@/lib/strapi'
-import type { WithAsyncRequest } from '@/utils/next-async-props'
+
 
 // Added by fix-async-props codemod
-type PagePropsSync = { params?: any; searchParams?: any };
-type PageProps = WithAsyncRequest<PagePropsSync>
+type PageProps = {
+  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
 
 
 export function toMonthNumber(raw?: string | null): number | undefined {

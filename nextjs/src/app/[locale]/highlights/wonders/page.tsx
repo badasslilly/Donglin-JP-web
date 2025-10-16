@@ -14,10 +14,12 @@ import BlockRendererClient from '@/components/BlockRendererClient'
 import BorderBox from '@/components/ui/BorderBox'
 import { getWondersPage, mediaURL, type Locale } from '@/lib/strapi'
 import clsx from 'clsx'
-import { WithAsyncRequest } from '@/utils/next-async-props'
 
-type PagePropsSync = { params: { locale: Locale } }
-type PageProps = WithAsyncRequest<PagePropsSync>
+
+type PageProps = {
+  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
 
 export default async function WondersPage(props: PageProps) {
   const { locale } = await props.params
