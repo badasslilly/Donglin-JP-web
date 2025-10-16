@@ -9,16 +9,16 @@ import { Footer } from '@/components/Footer'
 
 import type { Locale } from '@/lib/strapi'
 import { getNavWithChildren } from '@/lib/nav'
-import type { WithAsyncRequest } from '@/utils/next-async-props'
+
 import React from 'react'
 
-type PagePropsSync = {
-  children: React.ReactNode
-  params: { locale: Locale }
+type LayoutProps = {
+  children: React.ReactNode;
+  params: Promise<{ locale: 'ja' | 'en' }>;
 }
-type PageProps = WithAsyncRequest<PagePropsSync>
 
-export default async function LocaleLayout(props: PageProps) {
+
+export default async function LocaleLayout(props: LayoutProps) {
   const { children } = props
   const { locale } = await props.params
 

@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { getCategoriesWithPeople, mediaURL, Locale } from '@/lib/strapi'
 import CategorySection, { PersonFlat } from '@/components/ui/CategorySection'
-import type { WithAsyncRequest } from '@/utils/next-async-props'
+
 
 interface PersonRaw {
   id: number
@@ -38,11 +38,10 @@ const byOrderAsc = <
 const unwrap = <T extends Record<string, any>>(x: any): T =>
   ('attributes' in x ? { id: x.id, ...x.attributes } : x) as T
 
-type PagePropsSync = {
-  params: { locale: Locale }
-  // add searchParams if you use it, otherwise omit it
+type PageProps = {
+  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
-type PageProps = WithAsyncRequest<PagePropsSync>
 
 export default async function PeopleIndex(props: PageProps) {
   const { locale } = await props.params

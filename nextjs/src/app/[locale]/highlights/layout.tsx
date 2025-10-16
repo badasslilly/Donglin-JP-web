@@ -4,7 +4,7 @@ import { getHighlightsPage, mediaURL, Locale } from "@/lib/strapi";
 import { shippori } from "@/styles/fonts";
 import { cache } from "react";
 import React from "react";
-import type { WithAsyncRequest } from '@/utils/next-async-props';
+;
 
 /* ——— cache shell so /highlights/* children reuse the fetch ——— */
 const getHighlightsShell = cache(async (locale: Locale) => {
@@ -24,13 +24,12 @@ const getHighlightsShell = cache(async (locale: Locale) => {
   };
 });
 
-type PagePropsSync = {
+type LayoutProps = {
   children: React.ReactNode;
-  params: { locale: Locale };
-};
-type PageProps = WithAsyncRequest<PagePropsSync>;
+  params: Promise<{ locale: 'ja' | 'en' }>;
+}
 
-export default async function HighlightsLayout(props: PageProps) {
+export default async function HighlightsLayout(props: LayoutProps) {
   const { children } = props;
   const { locale } = await props.params;
 

@@ -1,16 +1,18 @@
-
+// src/app/[locale]/about/layout.tsx
 import PageTabs from "@/components/ui/PageTabs";
 import HeroHeader from "@/components/ui/HeroHeader";
 import { getAboutPage, mediaURL, Locale } from "@/lib/strapi";
 import { cache } from "react";
 import { shippori } from "@/styles/fonts";
-import BorderWrapper from "@/components/ui/BorderWrapper";
-import type { WithAsyncRequest } from '@/utils/next-async-props'
 
-// Added by fix-async-props codemod
-type PagePropsSync = { children: React.ReactNode; params: { locale: Locale } }
-type PageProps = WithAsyncRequest<PagePropsSync>
+// 🚫 remove WithAsyncRequest import
+// 
 
+// Next-accepted props for a layout using async request props
+type LayoutProps = {
+  children: React.ReactNode;
+  params: Promise<{ locale: Locale }>;
+};
 
 const getShell = cache(async (locale: Locale) => {
   const about = await getAboutPage(locale);
@@ -22,22 +24,21 @@ const getShell = cache(async (locale: Locale) => {
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .map((t) => ({
         label: t.label,
-        href: t.href.startsWith("/") ? `/${locale}${t.href}`.replace("//", "/") : t.href,
+        href: t.href.startsWith("/")
+          ? `/${locale}${t.href}`.replace("//", "/")
+          : t.href,
       })),
   };
 });
 
-export default async function AboutLayout(props: PageProps) {
-  // Next 15 async request props shim (added by codemod)
-
-  const { children } = props
-  const { locale } = await props.params// ② await it here
-    const { heroSrc, jaTitle, enTitle, tabs } = await getShell(locale);
+export default async function AboutLayout({ children, params }: LayoutProps) {
+  const { locale } = await params; // await the async request props
+  const { heroSrc, jaTitle, enTitle, tabs } = await getShell(locale);
 
   return (
-    <div className={`min-h-screen bg-white text-gray-900 ${shippori.className} `}>
+    <div className={`min-h-screen bg-white text-gray-900 ${shippori.className}`}>
       <HeroHeader bgSrc={heroSrc} title={jaTitle} subtitle={enTitle} />
-      
+
       {tabs.length > 0 && (
         <PageTabs
           tabs={tabs}
