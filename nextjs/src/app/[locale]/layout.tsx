@@ -11,6 +11,7 @@ import type { Locale } from '@/lib/strapi'
 import { getNavWithChildren } from '@/lib/nav'
 
 import React from 'react'
+import { getMessages } from 'next-intl/server'
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -21,6 +22,7 @@ type LayoutProps = {
 export default async function LocaleLayout(props: LayoutProps) {
   const { children } = props
   const { locale } = await props.params
+  const messages = await getMessages();
 
   const global = await getGlobal(locale)
   if (!global) notFound()
@@ -31,7 +33,7 @@ export default async function LocaleLayout(props: LayoutProps) {
 
   return (
     <>
-      <NextIntlClientProvider locale={locale}>
+      <NextIntlClientProvider locale={locale} messages={messages}>
         <SiteNav locale={locale} items={items} logoUrl={hwLogo} />
         {children}
       </NextIntlClientProvider>
