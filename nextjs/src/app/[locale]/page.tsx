@@ -21,8 +21,6 @@ import {
   mediaURL,
   resolveMediaUrl,        //  ← NEW
 } from '@/lib/strapi'
-import HeroVideo from '@/components/ui/HeroVideo'
-
 
 // Added by fix-async-props codemod
 type PageProps = {
