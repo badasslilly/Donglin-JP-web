@@ -12,7 +12,7 @@ type PagePropsSync = { params?: any; searchParams?: any };
 type PageProps = WithAsyncRequest<PagePropsSync>
 
 
-export function toMonthNumber(raw?: string | null): number | undefined {
+function toMonthNumber(raw?: string | null): number | undefined {
   if (!raw) return
   const m = raw.replace(/^month-/, '')
   const n = Number(m)

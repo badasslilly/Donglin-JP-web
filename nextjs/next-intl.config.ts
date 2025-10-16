@@ -1,9 +1,11 @@
-/** @type {import('next-intl').NextIntlConfig} */
-module.exports = {
-  locales: ['ja', 'en'],     // add 'zh' etc. when ready
-  defaultLocale: 'ja',
-  messages: {
-    ja: () => import('./messages/ja.json'),
-    en: () => import('./messages/en.json')
-  }
+// next-intl.config.ts
+import type { NextIntlConfig } from 'next-intl';
+
+const config: NextIntlConfig = {
+  locales: ['ja', 'en'],
+  defaultLocale: 'ja'
+  // No messages here; you load them at runtime elsewhere
 };
+
+export default config;
+

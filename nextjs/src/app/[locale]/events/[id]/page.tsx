@@ -15,7 +15,7 @@ type PagePropsSync = { params?: any; searchParams?: any };
 type PageProps = WithAsyncRequest<PagePropsSync>
 
 
-export function formatDateWithWeekday(iso: string, locale: string) {
+function formatDateWithWeekday(iso: string, locale: string) {
   const lang = locale.startsWith('ja') ? 'ja' : 'en'
   const d = dayjs(iso).locale(lang)
   return lang === 'ja'
