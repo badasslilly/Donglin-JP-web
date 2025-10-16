@@ -5,6 +5,12 @@ import AnnualTimeline, { AnnualEvent } from '@/components/ui/AnnualTimeline'
 import MonthMenu from '@/components/ui/MonthMenu'
 import Legend from '@/components/ui/Legend'
 import { getAllEvents, Locale } from '@/lib/strapi'
+import type { WithAsyncRequest } from '@/utils/next-async-props'
+
+// Added by fix-async-props codemod
+type PagePropsSync = { params?: any; searchParams?: any };
+type PageProps = WithAsyncRequest<PagePropsSync>
+
 
 export function toMonthNumber(raw?: string | null): number | undefined {
   if (!raw) return
@@ -13,9 +19,7 @@ export function toMonthNumber(raw?: string | null): number | undefined {
   return n >= 1 && n <= 12 ? n : undefined
 }
 
-export default async function EventsPage(props: {
-  params: Promise<{ locale: Locale }>
-}) {
+export default async function EventsPage(props: PageProps) {
   // ✅ Next 15: await params
   const { locale } = await props.params
 

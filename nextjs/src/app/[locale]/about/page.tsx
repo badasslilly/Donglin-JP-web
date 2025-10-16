@@ -6,6 +6,12 @@ import { getAboutPage, mediaURL, Locale } from '@/lib/strapi'
 
 import Image from 'next/image'
 import clsx from 'clsx'
+import type { WithAsyncRequest } from '@/utils/next-async-props'
+
+// Added by fix-async-props codemod
+type PagePropsSync = { params?: any; searchParams?: any };
+type PageProps = WithAsyncRequest<PagePropsSync>
+
 
 /* ---------- helpers ------------------------------------------------ */
 const hrefFor = (loc: Locale, p: string) =>
@@ -25,11 +31,11 @@ function renderBlocks(blocks: any[]) {
 }
 
 /* ---------- page component ---------------------------------------- */
-export default async function AboutPage({
-  params,
-}: {
-  params: Promise<{ locale: Locale }>
-}) {
+export default async function AboutPage(props: PageProps) {
+  // Next 15 async request props shim (added by codemod)
+  const params = await props.params;
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
+
   /* 1. await params (Next 15) */
   const { locale } = await params
   const isEN = String(locale).startsWith('en')

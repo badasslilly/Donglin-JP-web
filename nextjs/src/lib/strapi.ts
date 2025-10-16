@@ -68,7 +68,18 @@ export function resolveMediaUrl(m?: MediaLike): string {
 /* ------------------------------------------------------------------ */
 /*  Site-wide Global (unchanged)                                      */
 /* ------------------------------------------------------------------ */
-export interface NavItem { label: string; href: string; isExternal?: boolean | null }
+export interface NavChild {
+  label: string;
+  href: string;
+  isExternal?: boolean | null;
+}
+export interface NavItem { 
+  label: string; 
+  href: string; 
+  isExternal?: boolean | null
+  children?: NavChild[];
+  key?: string;
+}
 export interface Social  { platform: string; url: string }
 
 export interface GlobalData {

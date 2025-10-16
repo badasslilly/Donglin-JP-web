@@ -9,23 +9,27 @@ import { Footer } from '@/components/Footer'
 
 import type { Locale } from '@/lib/strapi'
 import { getNavWithChildren } from '@/lib/nav'
+import type { WithAsyncRequest } from '@/utils/next-async-props'
+import React from 'react'
 
-export default async function LocaleLayout({
-  children,
-  params,
-}: {
+type PagePropsSync = {
   children: React.ReactNode
-  params: Promise<{ locale: Locale }>
-}) {
-  const { locale } = await params
+  params: { locale: Locale }
+}
+type PageProps = WithAsyncRequest<PagePropsSync>
+
+export default async function LocaleLayout(props: PageProps) {
+  const { children } = props
+  const { locale } = await props.params
+
   const global = await getGlobal(locale)
   if (!global) notFound()
-    const footerLogoUrl  = mediaURL(global.footer_logo?.url);
-    const { items, logoUrl } = await getNavWithChildren(locale);
+
+  const footerLogoUrl = mediaURL(global.footer_logo?.url)
+  const { items } = await getNavWithChildren(locale)
   const hwLogo = mediaURL(global.handwritng_logo_h?.url)
 
   return (
-    /* 🍃 fragment only – no <html> / <body> here */
     <>
       <NextIntlClientProvider locale={locale}>
         <SiteNav locale={locale} items={items} logoUrl={hwLogo} />

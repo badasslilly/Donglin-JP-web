@@ -5,6 +5,12 @@ import { getAboutPage, mediaURL, Locale } from "@/lib/strapi";
 import { cache } from "react";
 import { shippori } from "@/styles/fonts";
 import BorderWrapper from "@/components/ui/BorderWrapper";
+import type { WithAsyncRequest } from '@/utils/next-async-props'
+
+// Added by fix-async-props codemod
+type PagePropsSync = { children: React.ReactNode; params: { locale: Locale } }
+type PageProps = WithAsyncRequest<PagePropsSync>
+
 
 const getShell = cache(async (locale: Locale) => {
   const about = await getAboutPage(locale);
@@ -21,14 +27,11 @@ const getShell = cache(async (locale: Locale) => {
   };
 });
 
-export default async function AboutLayout({
-    children,
-    params: promiseParams,
-  }: {
-    children: React.ReactNode;
-    params: Promise<{ locale: Locale }>;   // ① declare as Promise
-  }) {
-    const { locale } = await promiseParams; // ② await it here
+export default async function AboutLayout(props: PageProps) {
+  // Next 15 async request props shim (added by codemod)
+
+  const { children } = props
+  const { locale } = await props.params// ② await it here
     const { heroSrc, jaTitle, enTitle, tabs } = await getShell(locale);
 
   return (

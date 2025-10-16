@@ -1,9 +1,9 @@
 /** @format */
 
 import Image from 'next/image'
-
 import { getCategoriesWithPeople, mediaURL, Locale } from '@/lib/strapi'
 import CategorySection, { PersonFlat } from '@/components/ui/CategorySection'
+import type { WithAsyncRequest } from '@/utils/next-async-props'
 
 interface PersonRaw {
   id: number
@@ -22,7 +22,6 @@ interface CategoryFlat {
   people?: any
 }
 
-/* put this near the top of people/page.tsx -------------------------------- */
 const byOrderAsc = <
   T extends { order?: string | number | null; title?: string | null },
 >(
@@ -32,39 +31,28 @@ const byOrderAsc = <
 ) => {
   const A = a.order === null || a.order === undefined ? Infinity : +a.order
   const B = b.order === null || b.order === undefined ? Infinity : +b.order
-
   if (A !== B) return A - B
-
-  /* title may be undefined → fallback to "" to avoid TypeError */
-  const titleA = a.title ?? ''
-  const titleB = b.title ?? ''
-
-  return titleA.localeCompare(titleB, locale)
+  return (a.title ?? '').localeCompare(b.title ?? '', locale)
 }
 
-// helper – flatten Strapi v5 wrapper when present
 const unwrap = <T extends Record<string, any>>(x: any): T =>
   ('attributes' in x ? { id: x.id, ...x.attributes } : x) as T
 
-interface PageProps {
-  searchParams?: { locale?: Locale; category?: string }
-}
-
-export default async function PeopleIndex({
-  params,
-}: {
+type PagePropsSync = {
   params: { locale: Locale }
-}) {
-  const locale = params.locale
+  // add searchParams if you use it, otherwise omit it
+}
+type PageProps = WithAsyncRequest<PagePropsSync>
 
-  /* ── all categories view ───────────────────────────────────── */
+export default async function PeopleIndex(props: PageProps) {
+  const { locale } = await props.params
+
   const cats: CategoryFlat[] = (await getCategoriesWithPeople(locale))
     .map((x): CategoryFlat => unwrap<CategoryFlat>(x))
     .sort((a, b) => byOrderAsc(a, b, locale))
 
   return (
     <main className='max-w-6xl mx-auto px-2 py-5'>
-      {/* ---------- title with seal icon ---------- */}
       <div className='mb-10 flex items-center justify-center gap-3 sm:gap-4'>
         <Image
           src='/imgs/buddha_seal.png'
@@ -81,7 +69,7 @@ export default async function PeopleIndex({
 
       {cats.map((cat) => {
         const people: PersonFlat[] = (cat.people?.data ?? cat.people ?? [])
-          .map((x: unknown): PersonRaw => unwrap<PersonRaw>(x)) // x typed
+          .map((x: unknown): PersonRaw => unwrap<PersonRaw>(x))
           .sort(byOrderAsc)
           .map(
             (p: PersonRaw): PersonFlat => ({

@@ -4,12 +4,18 @@ import SectionHeading from '@/components/ui/SectionHeading'
 import BlockRow from '@/components/ui/BlockRow'
 import VideoBlock from '@/components/ui/VideoBlock'
 import { getHighlightsShell, getPageContentBySlug } from '@/lib/strapi'
+import type { WithAsyncRequest } from '@/utils/next-async-props'
 
-export default async function Highlights({
-  params,
-}: {
-  params: { locale: 'ja' | 'en' }
-}) {
+// Added by fix-async-props codemod
+type PagePropsSync = { params?: any; searchParams?: any };
+type PageProps = WithAsyncRequest<PagePropsSync>
+
+
+export default async function Highlights(props: PageProps) {
+  // Next 15 async request props shim (added by codemod)
+  const params = await props.params;
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
+
   const locale = params.locale
   const data = await getPageContentBySlug('donglin-grand-amitabha', locale)
   const { video } = await getHighlightsShell(locale)

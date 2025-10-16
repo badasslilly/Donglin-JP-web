@@ -8,6 +8,12 @@ import { kindColor, kindLabel, badgeColor, tagLabel } from '@/data/kinds'
 import { getEventById } from '@/lib/strapi'
 import BlockRendererClient from '@/components/BlockRendererClient'
 import Link from 'next/link'
+import type { WithAsyncRequest } from '@/utils/next-async-props'
+
+// Added by fix-async-props codemod
+type PagePropsSync = { params?: any; searchParams?: any };
+type PageProps = WithAsyncRequest<PagePropsSync>
+
 
 export function formatDateWithWeekday(iso: string, locale: string) {
   const lang = locale.startsWith('ja') ? 'ja' : 'en'
@@ -18,9 +24,7 @@ export function formatDateWithWeekday(iso: string, locale: string) {
 }
 
 /* ───── Page Component (await params) ───── */
-export default async function EventDetail(props: {
-  params: Promise<{ id: string; locale: string }>
-}) {
+export default async function EventDetail(props: PageProps) {
   // 👇 must await params in Next 15
   const { id, locale } = await props.params
 

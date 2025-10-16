@@ -22,12 +22,18 @@ import {
   resolveMediaUrl,        //  ← NEW
 } from '@/lib/strapi'
 import HeroVideo from '@/components/ui/HeroVideo'
+import type { WithAsyncRequest } from '@/utils/next-async-props'
 
-export default async function LocaleHome({
-  params,
-}: {
-  params: { locale: Locale }
-}) {
+// Added by fix-async-props codemod
+type PagePropsSync = { params?: any; searchParams?: any };
+type PageProps = WithAsyncRequest<PagePropsSync>
+
+
+export default async function LocaleHome(props: PageProps) {
+  // Next 15 async request props shim (added by codemod)
+  const params = await props.params;
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
+
   const locale = params.locale    
   /* --------- fetch --------- */
   const global = await getGlobal(locale)      // not used yet, but keep for nav

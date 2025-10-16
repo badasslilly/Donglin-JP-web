@@ -3,6 +3,8 @@ import PageTabs    from "@/components/ui/PageTabs";
 import { getHighlightsPage, mediaURL, Locale } from "@/lib/strapi";
 import { shippori } from "@/styles/fonts";
 import { cache } from "react";
+import React from "react";
+import type { WithAsyncRequest } from '@/utils/next-async-props';
 
 /* ——— cache shell so /highlights/* children reuse the fetch ——— */
 const getHighlightsShell = cache(async (locale: Locale) => {
@@ -22,16 +24,17 @@ const getHighlightsShell = cache(async (locale: Locale) => {
   };
 });
 
-export default async function HighlightsLayout({
-  children,
-  params,
-}: {
+type PagePropsSync = {
   children: React.ReactNode;
   params: { locale: Locale };
-}) {
-  const { heroSrc, jaTitle, enTitle, tabs } = await getHighlightsShell(
-    params.locale,
-  );
+};
+type PageProps = WithAsyncRequest<PagePropsSync>;
+
+export default async function HighlightsLayout(props: PageProps) {
+  const { children } = props;
+  const { locale } = await props.params;
+
+  const { heroSrc, jaTitle, enTitle, tabs } = await getHighlightsShell(locale);
 
   return (
     <div className={`min-h-screen bg-white text-gray-900 ${shippori.className} font-semibold`}>

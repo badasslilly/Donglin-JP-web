@@ -6,12 +6,18 @@ import { ExternalLink } from 'lucide-react';
 import HeroHeader from '@/components/ui/HeroHeader';
 import { shippori } from '@/styles/fonts';
 import { getNewsList, Locale } from '@/lib/strapi';
+import type { WithAsyncRequest } from '@/utils/next-async-props'
 
-export default async function NewsIndex({
-  params,
-}: {
-  params: Promise<{ locale: Locale }>;
-}) {
+// Added by fix-async-props codemod
+type PagePropsSync = { params?: any; searchParams?: any };
+type PageProps = WithAsyncRequest<PagePropsSync>
+
+
+export default async function NewsIndex(props: PageProps) {
+  // Next 15 async request props shim (added by codemod)
+  const params = await props.params;
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
+
   // ✅ Next 15: params is async
   const { locale } = await params;
 

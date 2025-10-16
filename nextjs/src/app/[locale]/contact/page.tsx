@@ -5,15 +5,21 @@ import { shippori } from '@/styles/fonts';
 import HeroHeader from '@/components/ui/HeroHeader';
 import ContactPageClient from '@/components/ContactPageClient';
 import { getDictionary, isLocale, type Locale } from '@/i18n/get-dictionary';
+import type { WithAsyncRequest } from '@/utils/next-async-props'
+
+// Added by fix-async-props codemod
+type PagePropsSync = { params?: any; searchParams?: any };
+type PageProps = WithAsyncRequest<PagePropsSync>
+
 
 // Helper to convert readonly/undefined -> mutable string[]
 const toMutable = (arr?: readonly string[]) => Array.from(arr ?? []);
 
-export default async function ContactPage({
-  params,
-}: {
-  params: { locale: Locale }
-}) {
+export default async function ContactPage(props: PageProps) {
+  // Next 15 async request props shim (added by codemod)
+  const params = await props.params;
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
+
   const locale = params.locale    
   // If this route is static (app/contact), no params exist -> default to 'ja'
 
