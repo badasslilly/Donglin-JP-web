@@ -1,8 +1,8 @@
-import { redirect } from 'next/navigation';
-import { getLocale } from 'next-intl/server';   // ✅ built-in helper
+// src/app/page.tsx
+import { redirect } from "next/navigation";
 
-export default async function RootRedirect() {
-  /* Locale was detected in middleware; this just reads it */
-  const locale = await getLocale();             // 'ja' | 'en' | …
-  redirect(`/${locale}`);
+// Simple static redirect to the default locale.
+// Keep this file tiny and dependency-free so prerendering "/" never imports next-intl.
+export default function RootRedirect() {
+  redirect("/ja");
 }
