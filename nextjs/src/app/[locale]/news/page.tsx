@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 /** @format */
 
 import Link from 'next/link';
@@ -7,23 +6,12 @@ import HeroHeader from '@/components/ui/HeroHeader';
 import { shippori } from '@/styles/fonts';
 import { getNewsList, Locale } from '@/lib/strapi';
 
-
-// Added by fix-async-props codemod
 type PageProps = {
-  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}
+  params: { locale: Locale };
+  searchParams?: Record<string, string | string[] | undefined>;
+};
 
-
-
-export default async function NewsIndex(props: PageProps) {
-  // Next 15 async request props shim (added by codemod)
-  const params = await props.params;
-  const searchParams = props.searchParams ? await props.searchParams : undefined;
-
-  // ✅ Next 15: params is async
-  const { locale } = await params;
-
+export default async function NewsIndex({ params: { locale } }: PageProps) {
   const news = await getNewsList(locale);
 
   return (
@@ -40,7 +28,7 @@ export default async function NewsIndex(props: PageProps) {
                 </time>
 
                 <Link
-                  href={`/${locale}/news/${n.slug}`} // ← explicit href is safest
+                  href={`/${locale}/news/${n.slug}`}
                   className="pb-0.5 text-gray-900 transition-colors hover:text-purple-700"
                 >
                   {n.title}
@@ -62,3 +50,4 @@ export default async function NewsIndex(props: PageProps) {
     </main>
   );
 }
+

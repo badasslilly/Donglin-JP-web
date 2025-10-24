@@ -1,6 +1,5 @@
 {
-  "HomePage": {
-    "title": "南無阿弥陀仏!",
-    "about": "東林寺についてご覧ください"
-  }
+  "nav.home": "ホーム",
+  "nav.about": "東林寺について",
+  "common.loading": "読み込み中..."
 }

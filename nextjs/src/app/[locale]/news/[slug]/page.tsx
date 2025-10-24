@@ -1,29 +1,18 @@
-export const dynamic = 'force-dynamic';
+/** @format */
 
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import HeroHeader from '@/components/ui/HeroHeader';
 import BlockRendererClient from '@/components/BlockRendererClient';
 import { getNewsBySlug, Locale } from '@/lib/strapi';
 import { shippori } from '@/styles/fonts';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
 
-
-// Added by fix-async-props codemod
 type PageProps = {
-  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}
+  params: { locale: Locale; slug: string };
+  searchParams?: Record<string, string | string[] | undefined>;
+};
 
-
-
-export default async function NewsDetail(props: PageProps) {
-  // Next 15 async request props shim (added by codemod)
-  const params = await props.params;
-  const searchParams = props.searchParams ? await props.searchParams : undefined;
-
-  // ✅ Next 15: params is async
-  const { locale, slug } = await params;
-
+export default async function NewsDetail({ params: { locale, slug } }: PageProps) {
   const detail = await getNewsBySlug(slug, locale);
   if (!detail) notFound();
 
@@ -65,3 +54,4 @@ export default async function NewsDetail(props: PageProps) {
     </main>
   );
 }
+

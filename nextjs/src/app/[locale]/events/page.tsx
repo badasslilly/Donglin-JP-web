@@ -1,36 +1,30 @@
 /** @format */
 
-import { shippori } from '@/styles/fonts'
-import AnnualTimeline, { AnnualEvent } from '@/components/ui/AnnualTimeline'
-import MonthMenu from '@/components/ui/MonthMenu'
-import Legend from '@/components/ui/Legend'
-import { getAllEvents, Locale } from '@/lib/strapi'
+import { shippori } from '@/styles/fonts';
+import AnnualTimeline, { AnnualEvent } from '@/components/ui/AnnualTimeline';
+import MonthMenu from '@/components/ui/MonthMenu';
+import Legend from '@/components/ui/Legend';
+import { getAllEvents, Locale } from '@/lib/strapi';
 
-
-// Added by fix-async-props codemod
 type PageProps = {
-  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}
-
-
+  params: { locale: Locale };
+  searchParams?: Record<string, string | string[] | undefined>;
+};
 
 function toMonthNumber(raw?: string | null): number | undefined {
-  if (!raw) return
-  const m = raw.replace(/^month-/, '')
-  const n = Number(m)
-  return n >= 1 && n <= 12 ? n : undefined
+  if (!raw) return;
+  const m = raw.replace(/^month-/, '');
+  const n = Number(m);
+  return n >= 1 && n <= 12 ? n : undefined;
 }
 
-export default async function EventsPage(props: PageProps) {
-  // ✅ Next 15: await params
-  const { locale } = await props.params
-
-  const strapiEvents = await getAllEvents(locale)
+export default async function EventsPage({ params: { locale } }: PageProps) {
+  // Server fetch (ISR inside getAllEvents)
+  const strapiEvents = await getAllEvents(locale);
 
   const annualEvents: AnnualEvent[] = strapiEvents.map((ev) => {
     const monthNum =
-      toMonthNumber(ev.month) ?? new Date(ev.date_start).getMonth() + 1
+      toMonthNumber(ev.month) ?? new Date(ev.date_start).getMonth() + 1;
 
     return {
       id: ev.id,
@@ -41,12 +35,12 @@ export default async function EventsPage(props: PageProps) {
       participation_tag: ev.participation_tag.trim(),
       title: ev.title,
       location: ev.location ?? '',
-    }
-  })
+    };
+  });
 
   const monthsWithEvents = Array.from(
     new Set(annualEvents.map((e) => e.month).filter(Boolean))
-  ) as number[]
+  ) as number[];
 
   return (
     <div
@@ -54,12 +48,14 @@ export default async function EventsPage(props: PageProps) {
     >
       <Legend locale={locale} />
 
-      <h2 className='mb-4 border-b border-gray-300 pt-5 pb-3 text-2xl font-semibold tracking-widest'>
+      <h2 className="mb-4 border-b border-gray-300 pt-5 pb-3 text-2xl font-semibold tracking-widest">
         年間行事
       </h2>
 
       <MonthMenu activeMonths={monthsWithEvents} locale={locale} />
+      {/* AnnualTimeline should link to `/${locale}/events/${id}` for each item */}
       <AnnualTimeline events={annualEvents} locale={locale} />
     </div>
-  )
+  );
 }
+

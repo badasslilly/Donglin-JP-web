@@ -1,22 +1,18 @@
 // src/i18n/request.ts
-import { getRequestConfig, type GetRequestConfigParams, type RequestConfig } from 'next-intl/server';
+import {getRequestConfig} from 'next-intl/server';
 
-const locales = ['ja', 'en'] as const;
-type AppLocale = (typeof locales)[number];
-const defaultLocale: AppLocale = 'ja';
+const ALLOWED = ['ja', 'en'] as const;
+type L = typeof ALLOWED[number];
 
-export default getRequestConfig(
-  // explicitly annotate params and return type so TS can check properly
-  async ({ requestLocale }: GetRequestConfigParams): Promise<RequestConfig> => {
-    const requested = await requestLocale; // type: string | undefined
+function normalize(l: string | undefined): L {
+  // accept "/jp" and map to "ja"
+  const cand = (l === 'jp' ? 'ja' : (l ?? '')).toLowerCase();
+  return (ALLOWED as readonly string[]).includes(cand) ? (cand as L) : 'ja';
+}
 
-    const locale: AppLocale =
-      typeof requested === 'string' && (locales as readonly string[]).includes(requested)
-        ? (requested as AppLocale)
-        : defaultLocale;
+export default getRequestConfig(async ({locale}) => {
+  const active = normalize(locale);
+  const messages = (await import(`../messages/${active}.json`)).default;
+  return {locale: active, messages};
+});
 
-    const messages = (await import(`../messages/${locale}.json`)).default;
-
-    return { locale, messages }; // locale is definitely `string` here
-  },
-);

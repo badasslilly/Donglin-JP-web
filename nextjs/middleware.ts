@@ -1,8 +1,13 @@
+// middleware.ts
 import createMiddleware from 'next-intl/middleware';
-import {routing} from './src/i18n/routing';
+import intlConfig from './next-intl.config';
 
-export default createMiddleware(routing);
+export default createMiddleware(intlConfig);
 
 export const config = {
-  matcher: ['/', '/(ja|en)/:path*']
+  matcher: [
+    // Match everything except Next internals/static files
+    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt)).*)'
+  ]
 };
+

@@ -1,41 +1,40 @@
 /** @format */
-import { notFound } from 'next/navigation'
-import dayjs from 'dayjs'
-import 'dayjs/locale/ja'
-import 'dayjs/locale/en'
-import { shippori } from '@/styles/fonts'
-import { kindColor, kindLabel, badgeColor, tagLabel } from '@/data/kinds'
-import { getEventById } from '@/lib/strapi'
-import BlockRendererClient from '@/components/BlockRendererClient'
-import Link from 'next/link'
 
-// ✅ match the dynamic segments: /[locale]/events/[id]
+import { notFound } from 'next/navigation';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ja';
+import 'dayjs/locale/en';
+import { shippori } from '@/styles/fonts';
+import { kindColor, kindLabel, badgeColor, tagLabel } from '@/data/kinds';
+import { getEventById, Locale } from '@/lib/strapi';
+import BlockRendererClient from '@/components/BlockRendererClient';
+import Link from 'next/link';
+
 type PageProps = {
-  params: Promise<{ id: string; locale: 'ja' | 'en' }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}
+  params: { id: string; locale: Locale };
+  searchParams?: Record<string, string | string[] | undefined>;
+};
 
 function formatDateWithWeekday(iso: string, locale: string) {
-  const lang = locale.startsWith('ja') ? 'ja' : 'en'
-  const d = dayjs(iso).locale(lang)
-  return lang === 'ja'
-    ? d.format('YYYY年M月D日(ddd)')
-    : d.format('ddd, D MMM YYYY')
+  const lang = locale.startsWith('ja') ? 'ja' : 'en';
+  const d = dayjs(iso).locale(lang);
+  return lang === 'ja' ? d.format('YYYY年M月D日(ddd)') : d.format('ddd, D MMM YYYY');
 }
 
-export default async function EventDetail(props: PageProps) {
-  const { id, locale } = await props.params
+export default async function EventDetail({ params: { id, locale } }: PageProps) {
+  // Strapi's numeric IDs sometimes arrive as strings—handle both
+  const normalizedId = String(id).trim();
 
-  // If your getEventById expects a number, uncomment next line:
-  // const ev = await getEventById(Number(id), locale)
-  const ev = await getEventById(id, locale)
-
-  if (!ev) notFound()
+  const ev = await getEventById(normalizedId, locale);
+  if (!ev) notFound();
 
   const dateText =
     ev.date_end && ev.date_end !== ev.date_start
-      ? `${formatDateWithWeekday(ev.date_start, locale)} 〜 ${formatDateWithWeekday(ev.date_end, locale)}`
-      : formatDateWithWeekday(ev.date_start, locale)
+      ? `${formatDateWithWeekday(ev.date_start, locale)} 〜 ${formatDateWithWeekday(
+          ev.date_end,
+          locale
+        )}`
+      : formatDateWithWeekday(ev.date_start, locale);
 
   return (
     <main className={`bg-white ${shippori.className}`}>
@@ -99,5 +98,6 @@ export default async function EventDetail(props: PageProps) {
         </div>
       </article>
     </main>
-  )
+  );
 }
+

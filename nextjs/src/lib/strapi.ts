@@ -1,3 +1,5 @@
+/** @format */
+
 import { BlocksContent } from "@strapi/blocks-react-renderer";
 import { notFound } from "next/navigation";
 import qs from "qs";
@@ -7,8 +9,9 @@ import { cache } from "react";
 /*  ENV – set these in .env                                           */
 /* ------------------------------------------------------------------ */
 const PUBLIC   = process.env.NEXT_PUBLIC_STRAPI_URL!;  
-const INTERNAL = (process.env.STRAPI_INTERNAL_URL || PUBLIC).replace(/\/+$/, '');  // e.g. http://127.0.0.1:1337
-const TOKEN = process.env.STRAPI_TOKEN!;      // read-only API token
+const INTERNAL = (process.env.STRAPI_INTERNAL_URL || PUBLIC).replace(/\/+$/, ""); // e.g. http://127.0.0.1:1337
+const TOKEN    = process.env.STRAPI_TOKEN!;                                       // read-only API token
+const IS_PROD  = process.env.NODE_ENV === "production";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
@@ -16,37 +19,57 @@ const TOKEN = process.env.STRAPI_TOKEN!;      // read-only API token
 export type Locale = "ja" | "en";
 
 function toQuery(obj: object) {
-  return qs.stringify(obj, { 
-    encodeValuesOnly: true, 
-    arrayFormat: "repeat" });
+  return qs.stringify(obj, { encodeValuesOnly: true, arrayFormat: "repeat" });
 }
 
-/* helper ----------------------------------------------------------- */
-export async function strapiFetch<T = unknown>(path: string): Promise<T> {
-  const isServer = typeof window === 'undefined';
-  const base     = isServer ? INTERNAL : PUBLIC;
+/* ------------------------------------------------------------------ */
+/*  Core fetch helper with smart caching (ISR)                         */
+/* ------------------------------------------------------------------ */
+type StrapiFetchOpts = {
+  /** Revalidation window in seconds; set 0 for per-request (avoid unless you must). */
+  revalidate?: number;
+  /** Cache tags for on-demand invalidation (Next.js cache tags). */
+  tags?: string[];
+  /** Extra headers if needed. */
+  headers?: Record<string, string>;
+  /** Force PUBLIC or INTERNAL (auto-picks based on server/client by default). */
+  base?: "public" | "internal";
+};
+
+export async function strapiFetch<T = unknown>(path: string, opts: StrapiFetchOpts = {}): Promise<T> {
+  const { revalidate = 300, tags, headers = {}, base } = opts;
+
+  const isServer = typeof window === "undefined";
+  const chosenBase =
+    base === "public" ? PUBLIC :
+    base === "internal" ? INTERNAL :
+    isServer ? INTERNAL : PUBLIC;
+
   const url =
     /^https?:\/\//.test(path)
       ? path
       : (() => {
-          if (!base) {
-            throw new Error(
-              'Strapi base URL is not set. Set NEXT_PUBLIC_STRAPI_URL (and STRAPI_INTERNAL_URL for server).'
-            );
+          if (!chosenBase) {
+            throw new Error("Strapi base URL is not set. Set NEXT_PUBLIC_STRAPI_URL (and STRAPI_INTERNAL_URL for server).");
           }
-          return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
+          return `${chosenBase}${path.startsWith("/") ? "" : "/"}${path}`;
         })();
 
-  // 🐞 DEBUG: log the final request URL in the server console
-  console.log("[Strapi]", url);
+  if (!IS_PROD) console.log("[Strapi]", url);
 
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${TOKEN}` },
-    next:    { revalidate: 60 },
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+      ...headers,
+    },
+    // ✅ Key: ISR settings
+    next: { revalidate, ...(tags?.length ? { tags } : {}) },
   });
 
   if (!res.ok) throw new Error(`Strapi ${res.status} – ${url}`);
-  return (await res.json()).data as T;
+  const json = await res.json();
+  // Most endpoints are returning { data: ... }
+  return (json?.data ?? json) as T;
 }
 
 export function mediaURL(path?: string | null): string {
@@ -65,8 +88,9 @@ export function resolveMediaUrl(m?: MediaLike): string {
   const raw = (m as any)?.url ?? (m as any)?.data?.attributes?.url ?? "";
   return mediaURL(raw || "");
 }
+
 /* ------------------------------------------------------------------ */
-/*  Site-wide Global (unchanged)                                      */
+/*  Site-wide Global                                                   */
 /* ------------------------------------------------------------------ */
 export interface NavChild {
   label: string;
@@ -96,19 +120,22 @@ export interface GlobalData {
   handwritng_logo_h: { url: string };
 }
 
+// Cache relatively short (nav/contact might change during ops): 10 min
 export async function getGlobal(locale: Locale) {
   const query = toQuery({
     locale,
     populate: {
       nav_items: "*",
       socials:   "*",
-      footer_logo:      { fields: ["url"] },
-      handwritng_logo_h:{ fields: ["url"] },
+      footer_logo:       { fields: ["url"] },
+      handwritng_logo_h: { fields: ["url"] },
     },
   });
-  return strapiFetch<GlobalData>(`/api/global?${query}`);
+  return strapiFetch<GlobalData>(`/api/global?${query}`, {
+    revalidate: 600,
+    tags: ["global", `global:${locale}`],
+  });
 }
-
 
 /* ------------------------------------------------------------------ */
 /*  Home Page (single-type)                                           */
@@ -142,25 +169,27 @@ export interface HomePageRaw {
   handwritng_logo_v?: MediaField
   avatar?:            MediaField
   home_video?:        MediaField
-  // … plus timestamps etc.  (we just ignore them)
 }
 
 export async function getHomePage(locale: Locale): Promise<HomePageRaw | null> {
   const q = qs.stringify(
     {
-      locale,                        // 'ja' | 'en'
+      locale,
       populate: {
-        About: { populate: '*' },    // every component inside
-        News:  { populate: '*' },
-        handwritng_logo_v: { fields: ['url'] },
-        avatar:            { fields: ['url'] },
-        home_video:        { fields: ['url'] },
+        About: { populate: "*" },
+        News:  { populate: "*" },
+        handwritng_logo_v: { fields: ["url"] },
+        avatar:            { fields: ["url"] },
+        home_video:        { fields: ["url"] },
       },
     },
     { encodeValuesOnly: true },
-  )
+  );
 
-  return await strapiFetch<HomePageRaw>(`/api/home-page?${q}`)
+  return strapiFetch<HomePageRaw>(`/api/home-page?${q}`, {
+    revalidate: 300, // 5 min
+    tags: ["home", `home:${locale}`],
+  });
 }
 
 /* ----------  About Page types -------------------------------------- */
@@ -168,12 +197,10 @@ export interface HistoryItem {
   era?: string | null;
   brief?: string | null;
 }
-
 export interface HistorySection {
   section_name?: string | null;
-  content?: HistoryItem[];          // repeatable component “History Item”
+  content?: HistoryItem[];
 }
-
 export interface AboutPageData {
   header?: {
     heading?: { title_ja?: string; title_en?: string } | null;
@@ -187,32 +214,29 @@ export interface AboutPageData {
   }[];
   page_title?: string | null;
   intro_text?: string | null;
-
-  // ⬇️ replaced fields
-  history_section?: HistorySection[];   // repeatable “History Section”
+  history_section?: HistorySection[];
 }
 
-/* ------------ selective populate ----------------------------------- */
+// Content updates less frequently: 15 min
 export async function getAboutPage(locale: Locale): Promise<AboutPageData> {
   const q = qs.stringify(
     {
       locale,
-      fields: ['page_title', 'intro_text'],  // removed 'history_headline'
+      fields: ["page_title", "intro_text"],
       populate: {
-        header:  { populate: ['bg_image', 'heading'] },
+        header:  { populate: ["bg_image", "heading"] },
         tab_bar: true,
-        content: { populate: ['image'] },
-
-        // NEW: nested component -> nested populate
-        history_section: {
-          populate: { content: true }, // brings [ { era, brief } ... ]
-        },
+        content: { populate: ["image"] },
+        history_section: { populate: { content: true } },
       },
     },
     { encodeValuesOnly: true },
   );
 
-  return await strapiFetch<AboutPageData>(`/api/about-page?${q}`);
+  return strapiFetch<AboutPageData>(`/api/about-page?${q}`, {
+    revalidate: 900,
+    tags: ["about", `about:${locale}`],
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -232,21 +256,23 @@ export interface HighlightsPageData {
   tab_bar?:  { label: string; href: string; order?: number | null }[];
 }
 
-export async function getHighlightsPage(
-  locale: Locale
-): Promise<HighlightsPageData> {
+// Similar editorial cadence: 15 min
+export async function getHighlightsPage(locale: Locale): Promise<HighlightsPageData> {
   const q = qs.stringify(
     {
       locale,
       populate: {
-        header: { populate: ['bg_image', 'heading'] },
+        header: { populate: ["bg_image", "heading"] },
         tab_bar: true,
-        video_info: { populate: ['posterUrl'] },   // or videoInfo
+        video_info: { populate: ["posterUrl"] },
       },
     },
     { encodeValuesOnly: true }
-  )
-  return strapiFetch<HighlightsPageData>(`/api/highlights-page?${q}`);
+  );
+  return strapiFetch<HighlightsPageData>(`/api/highlights-page?${q}`, {
+    revalidate: 900,
+    tags: ["highlights", `highlights:${locale}`],
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -262,7 +288,6 @@ export interface PersonBrief {
     portrait?: { data?: { attributes: { url: string } } };
   };
 }
-
 export interface Category {
   id: number;
   attributes: {
@@ -272,7 +297,6 @@ export interface Category {
     order?: number | null; 
   };
 }
-
 export interface PersonDetail {
   id: number;
   attributes: {
@@ -281,29 +305,31 @@ export interface PersonDetail {
     era?: string;
     biography?: any;
     order?: number | null; 
-    brief?: string;                                   // ★ NEW
+    brief?: string;
     portrait?: { data?: { attributes: { url: string } } };
     categories?: { data: { id: number; attributes: { title: string; slug: string } }[] };
     related_people?: { data: PersonBrief[] };
   };
 }
 
-/* ------ list page: categories + people (with brief + portrait) ---- */
+// Category list (rarely changes): 30 min
 export async function getCategoriesWithPeople(locale: Locale) {
   const query = toQuery({
     locale,
     populate: {
       people: {
-        fields: ["name", "slug", "brief", "biography", "order"],          
+        fields: ["name", "slug", "brief", "biography", "order"],
         populate: { portrait: { fields: ["url"] } },
       },
     },
-  
   });
-  return strapiFetch<Category[]>(`/api/categories?${query}`);
+  return strapiFetch<Category[]>(`/api/categories?${query}`, {
+    revalidate: 1800,
+    tags: ["categories", `categories:${locale}`],
+  });
 }
 
-/* ------ detail page: unchanged except brief now returned ---------- */
+// Person detail (infrequent edits): 30 min
 export async function getPersonBySlug(slug: string, locale: Locale) {
   const query = toQuery({
     locale,
@@ -312,31 +338,37 @@ export async function getPersonBySlug(slug: string, locale: Locale) {
       portrait:   { fields: ["url"] },
       categories: { fields: ["title", "slug", "order"] },
       related_people: {
-        fields: ["name", "slug", "brief"],            // ★ brief added
+        fields: ["name", "slug", "brief"],
         populate: { portrait: { fields: ["url"] } },
       },
     },
     pagination: { pageSize: 1 },
   });
-  const list = await strapiFetch<PersonDetail[]>(`/api/people?${query}`);
+  const list = await strapiFetch<PersonDetail[]>(`/api/people?${query}`, {
+    revalidate: 1800,
+    tags: ["person", `person:${slug}:${locale}`],
+  });
   if (!list.length) throw new Error(`Person “${slug}” not found`);
   return list[0];
 }
 
-/* ------ people filtered by category slug -------------------------- */
+// People by category (occasionally changes): 20 min
 export async function getPeopleByCategorySlug(catSlug: string, locale: Locale) {
   const query = toQuery({
     locale,
     filters: { categories: { slug: { $eq: catSlug } } },
     populate: { portrait: { fields: ["url"] } },
-    fields:   ["name", "slug", "brief"],              // ★ brief added
-    sort: ["name:asc", ],
+    fields:   ["name", "slug", "brief"],
+    sort: ["name:asc"],
   });
-  return strapiFetch<PersonBrief[]>(`/api/people?${query}`);
+  return strapiFetch<PersonBrief[]>(`/api/people?${query}`, {
+    revalidate: 1200,
+    tags: ["peopleByCategory", `peopleByCategory:${catSlug}:${locale}`],
+  });
 }
 
 /* ------------------------------------------------------------------ */
-/*  Pureland-Path Page (浄土宗修学概述)                                */
+/*  Pureland-Path Page                                                */
 /* ------------------------------------------------------------------ */
 export interface PathContent {
   id: number;
@@ -344,46 +376,34 @@ export interface PathContent {
   intro: unknown;               // RTE blocks / HTML
   image?: { url: string };
 }
-
 export interface PathSection {
   id: number;
   headline?: string | null;
-  content: PathContent[];       // ← already flattened
+  content: PathContent[];
 }
-
 export interface PurelandPathPage {
   section_block: PathSection[];
 }
-/* ------------------------------------------------------------------ */
-/*  Pureland-Path Page (浄土宗修学概述)                                */
-/* ------------------------------------------------------------------ */
 
-export async function getPurelandPathPage(
-  locale: Locale,
-): Promise<PurelandPathPage> {
+export async function getPurelandPathPage(locale: Locale): Promise<PurelandPathPage> {
   const q = toQuery({
     locale,
     populate: {
-      section_block: {
-        populate: { content: { populate: ["image"] } },
-      },
+      section_block: { populate: { content: { populate: ["image"] } } },
     },
   });
 
-  /* strapiFetch already returns the `.data` field */
-  const raw = await strapiFetch<any>(`/api/pureland-path-page?${q}`);
+  const raw = await strapiFetch<any>(`/api/pureland-path-page?${q}`, {
+    revalidate: 1800,
+    tags: ["purelandPath", `purelandPath:${locale}`],
+  });
 
-  /* single-type → { id, attributes:{ … } } */
   const attrs = "attributes" in raw ? raw.attributes : raw;
 
   const section_block: PathSection[] = (attrs.section_block ?? []).map(
     (s: any): PathSection => {
-      /* 🔑 handle both shapes:  [ … ] or { data:[ … ] }  */
       const rawContent = s.content;
-      const items = Array.isArray(rawContent)
-        ? rawContent
-        : rawContent?.data ?? [];
-
+      const items = Array.isArray(rawContent) ? rawContent : rawContent?.data ?? [];
       return {
         id: s.id,
         headline: s.headline ?? null,
@@ -403,49 +423,36 @@ export async function getPurelandPathPage(
 }
 
 /* ------------------------------------------------------------------ */
-/*  Wonders Page (浄土宗修学概述)                                */
+/*  Wonders Page                                                      */
 /* ------------------------------------------------------------------ */
 export interface WonderContent {
   id: number;
   headline?: string | null;
-  intro: unknown;                     // RTE / Blocks
+  intro: unknown;
   image?: { url: string } | undefined;
 }
-
 export interface WondersPageData {
   page_headline?: string | null;
   intro?: string | null;
   content_block: WonderContent[];
 }
 
-
 export async function getWondersPage(locale: Locale): Promise<WondersPageData> {
   const q = toQuery({
     locale,
     fields: ["page_headline", "intro"],
-    populate: {
-      content_block: { populate: ["image"] },
-    },
-  })
+    populate: { content_block: { populate: ["image"] } },
+  });
 
-  const path = `/api/wonders-page?${q}`
-  const base =
-    process.env.NEXT_PUBLIC_STRAPI_URL?.replace(/\/+$/, "") ?? "" // e.g. http://192.168.8.79
-  const url = `${base}${path}`
+  const raw = await strapiFetch<any>(`/api/wonders-page?${q}`, {
+    revalidate: 1800,
+    tags: ["wonders", `wonders:${locale}`],
+  });
 
-  // 👇 print the API endpoint being fetched
-  // (toggle as you like: always on, only in dev, or behind an env flag)
-  if (process.env.NODE_ENV !== "production") {
-    console.log("[Strapi]", url)
-  }
-  // or: if (process.env.NEXT_PUBLIC_DEBUG === "1") console.log("[Strapi]", url)
-
-  // do the fetch (strapiFetch expects a path)
-  const raw = await strapiFetch<any>(path)
-  const attrs = "attributes" in raw ? raw.attributes : raw
+  const attrs = "attributes" in raw ? raw.attributes : raw;
 
   const getImageUrl = (img: any): string | undefined =>
-    img?.url ?? img?.data?.attributes?.url ?? undefined
+    img?.url ?? img?.data?.attributes?.url ?? undefined;
 
   const content_block: WonderContent[] = (attrs.content_block ?? []).map(
     (item: any): WonderContent => ({
@@ -454,40 +461,46 @@ export async function getWondersPage(locale: Locale): Promise<WondersPageData> {
       intro: item.intro,
       image: getImageUrl(item.image) ? { url: getImageUrl(item.image)! } : undefined,
     })
-  )
+  );
 
   return {
     page_headline: attrs.page_headline ?? null,
     intro: attrs.intro ?? null,
     content_block,
-  }
+  };
 }
 
-
-
-/* ---------- News list ------------------------------ */
+/* ------------------------------------------------------------------ */
+/*  News                                                              */
+/* ------------------------------------------------------------------ */
 export interface NewsBrief {
   slug: string;
   title: string;
   date: string;
 }
 
+// List changes often while publishing: 5 min
 export async function getNewsList(locale: Locale): Promise<NewsBrief[]> {
   const q = toQuery({
     locale,
-    fields: ['title', 'slug', 'date'],
-    sort: ['date:desc'],
+    fields: ["title", "slug", "date"],
+    sort: ["date:desc"],
   });
 
-  let list = await strapiFetch<any[]>(`/api/news-items?${q}`);
+  let list = await strapiFetch<any[]>(`/api/news-items?${q}`, {
+    revalidate: 300,
+    tags: ["news:list", `news:list:${locale}`],
+  });
 
   if (!list?.length) {
-    // fallback to default locale if empty
     const qFallback = toQuery({
-      fields: ['title', 'slug', 'date'],
-      sort: ['date:desc'],
+      fields: ["title", "slug", "date"],
+      sort: ["date:desc"],
     });
-    list = await strapiFetch<any[]>(`/api/news-items?${qFallback}`);
+    list = await strapiFetch<any[]>(`/api/news-items?${qFallback}`, {
+      revalidate: 300,
+      tags: ["news:list", "news:list:fallback"],
+    });
   }
 
   return list.map((n) => ({
@@ -497,9 +510,6 @@ export async function getNewsList(locale: Locale): Promise<NewsBrief[]> {
   }));
 }
 
-
-
-/* ---------- News detail ---------------------------------------- */
 export interface NewsDetail {
   title: string;
   date : string;
@@ -507,20 +517,21 @@ export interface NewsDetail {
   body : any; // BlocksContent
 }
 
-const NEWS_IS_LOCALIZED = true;
+const NEWS_IS_LOCALIZED = true; // kept for compatibility
 
+// Detail: 30 min (update when editing or use tag revalidate)
 export async function getNewsBySlug(slug: string, locale: Locale) {
-  // 1) Try to find the entry in the current locale by slug
   const qp = new URLSearchParams({
-    'filters[$or][0][slug][$eq]': slug,                         // direct match in this locale
-    'filters[$or][1][localizations][slug][$eq]': slug,          // or a localized sibling has this slug
-    'locale': locale,                                           // ← key: search in current locale
-    'populate': '*',
+    "filters[$or][0][slug][$eq]": slug,
+    "filters[$or][1][localizations][slug][$eq]": slug,
+    "locale": locale,
+    "populate": "*",
   });
 
   try {
     const rows = await strapiFetch<{ data: any[] } | any[]>(
-      `/api/news-items?${qp.toString()}`
+      `/api/news-items?${qp.toString()}`,
+      { revalidate: 1800, tags: ["news:detail", `news:${slug}:${locale}`] }
     );
 
     const list: any[] = Array.isArray(rows) ? rows : (rows.data ?? []);
@@ -535,18 +546,18 @@ export async function getNewsBySlug(slug: string, locale: Locale) {
       };
     }
 
-    // 2) Fallback: look up the default-locale record by slug (no locale param)
+    // Fallback (no locale param)
     const qpFallback = new URLSearchParams({
-      'filters[$or][0][slug][$eq]': slug,
-      'filters[$or][1][localizations][slug][$eq]': slug,
-      'populate': '*',
+      "filters[$or][0][slug][$eq]": slug,
+      "filters[$or][1][localizations][slug][$eq]": slug,
+      "populate": "*",
     });
 
     const fbRows = await strapiFetch<{ data: any[] } | any[]>(
-      `/api/news-items?${qpFallback.toString()}`
+      `/api/news-items?${qpFallback.toString()}`,
+      { revalidate: 1800, tags: ["news:detail", `news:${slug}:fallback`] }
     );
     const fbList: any[] = Array.isArray(fbRows) ? fbRows : (fbRows.data ?? []);
-
     if (!fbList.length) return null;
 
     const fbRow   = fbList[0];
@@ -559,9 +570,9 @@ export async function getNewsBySlug(slug: string, locale: Locale) {
       body : fbAttrs.body,
     };
   } catch (e: any) {
-    console.error('[news:detail:error]', {
+    console.error("[news:detail:error]", {
       slug, locale, status: e?.status, url: e?.url,
-      bodyPreview: (e?.body || '').slice(0, 500),
+      bodyPreview: (e?.body || "").slice(0, 500),
       message: e?.message,
     });
     if (e?.status === 404) return null;
@@ -569,100 +580,99 @@ export async function getNewsBySlug(slug: string, locale: Locale) {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  Page Content by slug                                              */
+/* ------------------------------------------------------------------ */
 
 export async function getPageContentBySlug(slug: string, locale: string) {
   const query = qs.stringify(
     {
       filters: { slug: { $eq: slug } },
       locale,
-      fields: ['title'],
+      fields: ["title"],
       populate: {
-        sections: { populate: { blocks: { populate: ['image'] } } },
+        sections: { populate: { blocks: { populate: ["image"] } } },
       },
     },
     { encodeValuesOnly: true }
-  )
+  );
 
-  const url = `${PUBLIC}/api/page-contents?${query}`
+  const path = `/api/page-contents?${query}`;
+  if (!IS_PROD) console.log("[Strapi][getPageContentBySlug]", decodeURI(`${INTERNAL}${path}`));
 
-  // 👇 print the access URL (server console)
-  console.log('[Strapi][getPageContentBySlug]', decodeURI(url))
+  const raw = await strapiFetch<any>(path, {
+    revalidate: 600,
+    tags: ["pageContent", `pageContent:${slug}:${locale}`],
+  });
 
-  const res = await fetch(url, { next: { revalidate: 60 } })
-  if (!res.ok) throw new Error('Strapi fetch failed')
-
-  const json = await res.json()
-  return json.data?.[0] ?? null
+  return raw?.[0] ?? raw?.data?.[0] ?? null;
 }
 
-
-/* ------------------------------------------ */
-/*  lib/strapi.ts (or wherever the helper is) */
-/* ------------------------------------------ */
-
-
+/* ------------------------------------------------------------------ */
+/*  Highlights shell (memoized)                                       */
+/* ------------------------------------------------------------------ */
 export const getHighlightsShell = cache(async (locale: Locale) => {
-  const page = await getHighlightsPage(locale)
+  const page = await getHighlightsPage(locale);
 
-  /*  safest way → works whether it’s [] or undefined  */
-  const vi = page.video_info?.[0] ?? null     // ← grab first component
+  const vi = page.video_info?.[0] ?? null;
 
   return {
-    /* hero + tabs … (unchanged) */
     heroSrc:  mediaURL(page.header?.bg_image?.url),
-    jaTitle:  page.header?.heading?.title_ja ?? '',
-    enTitle:  page.header?.heading?.title_en ?? '',
+    jaTitle:  page.header?.heading?.title_ja ?? "",
+    enTitle:  page.header?.heading?.title_en ?? "",
     tabs:    (page.tab_bar ?? [])
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .map((t) => ({
         label: t.label,
-        href:  t.href.startsWith('/')
-          ? `/${locale}${t.href}`.replace('//', '/')
+        href:  t.href.startsWith("/")
+          ? `/${locale}${t.href}`.replace("//", "/")
           : t.href,
       })),
-
-    /* video block */
     video: vi
       ? {
-          title:       vi.title        ?? '',
-          description: vi.description  ?? '',
-          videoUrl:    vi.videoUrl     ?? '',
+          title:       vi.title        ?? "",
+          description: vi.description  ?? "",
+          videoUrl:    vi.videoUrl     ?? "",
           posterUrl:   mediaURL(vi.posterUrl?.url),
         }
       : null,
-  }
-})
+  };
+});
 
-
+/* ------------------------------------------------------------------ */
+/*  Events                                                            */
+/* ------------------------------------------------------------------ */
 export interface StrapiEvent {
-  id: number
-  title: string
-  slug: string
-  date_start: string
-  date_end: string | null
-  event_kind: string
-  participation_tag: string
-  location?: string | null
-  month?: string
-  description?: any
-  time?: string | null   
+  id: number;
+  title: string;
+  slug: string;
+  date_start: string;
+  date_end: string | null;
+  event_kind: string;
+  participation_tag: string;
+  location?: string | null;
+  month?: string;
+  description?: any;
+  time?: string | null;
 }
 
-/* ----- すべてのイベントを取得 (公開済) ----- */
+// Full list (changes monthly/weekly): 5 min
 export async function getAllEvents(locale: string): Promise<StrapiEvent[]> {
   const query = qs.stringify(
     {
       locale,
-      sort: ['date_start:asc'],
+      sort: ["date_start:asc"],
       pagination: { pageSize: 200 },
     },
     { encodeValuesOnly: true },
-  )
-
-  /* strapiFetch<T>() は .data 部分を返してくれる想定 */
-  return await strapiFetch<StrapiEvent[]>(`/api/events?${query}`)
+  );
+  return strapiFetch<StrapiEvent[]>(`/api/events?${query}`, {
+    revalidate: 300,
+    tags: ["events:all", `events:all:${locale}`],
+  });
 }
 
+// Single event: 10 min
 export async function getEventById(
   id: string,
   locale: string,
@@ -674,9 +684,12 @@ export async function getEventById(
       pagination: { pageSize: 1 },
     },
     { encodeValuesOnly: true },
-  )
+  );
 
-  // ✅ 正しい型を指定
-  const arr = await strapiFetch<StrapiEvent[]>(`/api/events?${query}`)
-  return arr[0] ?? null
+  const arr = await strapiFetch<StrapiEvent[]>(`/api/events?${query}`, {
+    revalidate: 600,
+    tags: ["event", `event:${id}:${locale}`],
+  });
+  return arr[0] ?? null;
 }
+

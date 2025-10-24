@@ -123,7 +123,7 @@ export default function AnnualTimeline({
                   />
 
                   <Link
-                    href={`/events/${ev.id}`}
+                    href={`/${locale}/events/${ev.id}`}
                     className={clsx(
                       'grid grid-cols-1 items-stretch',
                       // ↓↓↓ tighter vertical & horizontal spacing for EN

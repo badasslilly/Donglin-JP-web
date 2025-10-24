@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3000 -H 127.0.0.1",
     "lint": "next lint"
   },
   "dependencies": {
@@ -18,13 +18,14 @@
     "dayjs": "^1.11.13",
     "framer-motion": "^12.18.1",
     "lucide-react": "^0.523.0",
-    "next": "15.3.3",
-    "next-intl": "^4.3.4",
+    "next": "14.2.11",
+    "next-intl": "^4.4.0",
     "nodemailer": "^7.0.5",
     "qs": "^6.14.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "resend": "^6.1.3",
+    "sharp": "^0.34.4",
     "strapi-v5-plugin-populate-deep": "^4.0.5",
     "styled-components": "^6.1.19",
     "swiper": "^11.2.8",
@@ -36,13 +37,19 @@
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.17",
     "@types/qs": "^6.14.0",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "^18.2.73",
+    "@types/react-dom": "^18.2.23",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "husky": "^9.1.7",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "18.2.0",
+      "react-dom": "18.2.0"
+    }
   }
 }
