@@ -1,19 +1,14 @@
-// src/styles/fonts.ts
+// src/styles/fonts/fonts.ts
 import localFont from 'next/font/local';
 
-/**
- * Shippori Mincho (self-hosted)
- * Put font files next to this file in: src/styles/fonts/
- * or adjust the relative paths accordingly.
- */
+/** Shippori Mincho — prefer WOFF2; keep only weights you use */
 export const shippori = localFont({
   src: [
-    // Prefer WOFF2; keep TTF only if you don’t have WOFF2 yet
     { path: './ShipporiMincho-Regular.woff2', weight: '400', style: 'normal' },
     { path: './ShipporiMincho-Medium.woff2',  weight: '500', style: 'normal' },
     { path: './ShipporiMincho-Bold.woff2',    weight: '700', style: 'normal' },
 
-    // TEMP fallback (remove after you convert to WOFF2)
+    // TEMP fallback if you still only have TTFs:
     { path: './ShipporiMincho-Regular.ttf',   weight: '400', style: 'normal' },
     { path: './ShipporiMincho-Medium.ttf',    weight: '500', style: 'normal' },
     { path: './ShipporiMincho-Bold.ttf',      weight: '700', style: 'normal' },
@@ -23,14 +18,9 @@ export const shippori = localFont({
   preload: true
 });
 
-/**
- * Hannari Mincho (self-hosted)
- */
+/** Hannari Mincho */
 export const hannariMinchoFont = localFont({
-  // Prefer WOFF2
-  src: [
-    { path: './HannariMincho-Regular.woff2', weight: '400', style: 'normal' },
-  ],
+  src: [{ path: './HannariMincho-Regular.woff2', weight: '400', style: 'normal' }],
   variable: '--font-hannari-mincho',
   display: 'swap',
   preload: true

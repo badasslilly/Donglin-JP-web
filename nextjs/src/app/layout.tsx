@@ -1,17 +1,20 @@
-import { hannariMinchoFont, shippori } from '@/styles/fonts';
+// src/app/layout.tsx  (or src/app/[locale]/layout.tsx)
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
-
+import { shippori, hannariMinchoFont } from '@/styles/fonts';
 
 export const metadata: Metadata = {
-  title: '東林寺 / Donglin Temple',
-  description: 'Zen temple website powered by Strapi & Next.js'
+  title: '東林寺 / Donglin Monastery',
+  description: 'Pureland Monastery website powered by Strapi & Next.js'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html>
-      <body className={`${shippori.variable} ${hannariMinchoFont.variable} antialiased`}>{children}</body>
+    <html lang="ja" className={`${shippori.variable} ${hannariMinchoFont.variable}`}>
+      <body className="antialiased font-sans">
+        {children}
+      </body>
     </html>
   );
 }
+

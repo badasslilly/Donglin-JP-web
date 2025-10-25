@@ -21,7 +21,11 @@ import {
   resolveMediaUrl,
 } from '@/lib/strapi';
 import { localeHref } from '@/lib/localeHref';
-import HeroVideoSmart from '@/components/ui/HeroVideoSmart';
+import HeroVideoHLS from '@/components/ui/HeroVideoHLS';
+
+
+const HERO_HLS   = process.env.NEXT_PUBLIC_HERO_HLS || '/videos/hero/master.m3u8';
+const HERO_POSTER= process.env.NEXT_PUBLIC_HERO_POSTER || '/videos/home-hero-poster.jpg';
 
 // Next 15 async request props shim (from codemod)
 type PageProps = {
@@ -69,13 +73,18 @@ export default async function LocaleHome(props: PageProps) {
 
       {/* Hero (video) */}
       <section className="relative isolate flex flex-col justify-end overflow-hidden bg-black h-[50vh] md:h-[70vh] lg:h-[80vh]">
-        <div className="absolute inset-0 z-0 bg-black/50">
-          <BorderWrapper className="h-full w-full">
-		<video className="h-full w-full object-cover" 
-		src={heroVideo} autoPlay muted loop playsInline />
-      		</BorderWrapper>
-        </div>
-      </section>
+  {/* 🔧 pull in by 2px so the border isn't clipped by overflow-hidden */}
+  <div className="absolute inset-0 z-0 bg-black/50">
+    <BorderWrapper className="h-full w-full">
+      <HeroVideoHLS
+        src={HERO_HLS}                 // e.g. "/videos/hero/master.m3u8"
+        poster={HERO_POSTER}           // e.g. "/videos/home-hero-poster.jpg"
+        heightClasses="h-full"         // fill the frame height
+        className="w-full"             // fill width
+      />
+    </BorderWrapper>
+  </div>
+</section>
 
       {/* ✅ Pass server-fetched nav items; no client fetch */}
       <HomeBottomNav locale={locale} items={global.nav_items ?? []} />
