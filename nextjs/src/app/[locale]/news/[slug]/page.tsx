@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import HeroHeader from '@/components/ui/HeroHeader';
 import BlockRendererClient from '@/components/BlockRendererClient';
 import { getNewsBySlug, Locale } from '@/lib/strapi';
-import { shippori } from '@/styles/fonts';
+import { shippori } from '@/styles/fonts/fonts';
 
 type PageProps = {
   params: { locale: Locale; slug: string };

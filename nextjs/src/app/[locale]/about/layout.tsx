@@ -3,7 +3,7 @@ import PageTabs from "@/components/ui/PageTabs";
 import HeroHeader from "@/components/ui/HeroHeader";
 import { getAboutPage, mediaURL, Locale } from "@/lib/strapi";
 import { cache } from "react";
-import { shippori } from "@/styles/fonts";
+import { shippori } from '@/styles/fonts/fonts';
 
 // 🚫 remove WithAsyncRequest import
 // 

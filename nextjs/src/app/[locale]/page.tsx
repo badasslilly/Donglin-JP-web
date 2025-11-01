@@ -9,7 +9,7 @@ import HomeBottomNav        from '@/components/HomeBottomNav';
 import NewsSection          from '@/components/NewsSection';
 import BlockRendererClient  from '@/components/BlockRendererClient';
 import { ArrowButton }      from '@/components/ui/Button';
-import { shippori } from '@/styles/fonts';
+import { shippori } from '@/styles/fonts/fonts';
 
 import {
   Locale,

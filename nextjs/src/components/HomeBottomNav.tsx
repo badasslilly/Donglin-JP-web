@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import clsx from 'clsx';
-import { shippori } from '@/styles/fonts';
+import { shippori } from '@/styles/fonts/fonts';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import type { NavItem, Locale } from '@/lib/strapi';
 

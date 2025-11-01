@@ -9,7 +9,7 @@ import Link from 'next/link';
 import clsx from 'clsx';
 
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import {hannariMinchoFont} from '@/styles/fonts';
+import {hannariMinchoFont} from '@/styles/fonts/fonts';
 import type {Locale, NavItem} from '@/lib/strapi';
 import {localeHref} from '@/lib/localeHref';
 

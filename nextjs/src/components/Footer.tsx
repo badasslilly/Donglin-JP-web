@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { shippori } from '@/styles/fonts'
+import { shippori } from '@/styles/fonts/fonts'
 import { Instagram, Facebook, XIcon } from 'lucide-react'
 import { withLineBreaks } from '@/utils/text'
 import { Locale } from '@/lib/strapi'

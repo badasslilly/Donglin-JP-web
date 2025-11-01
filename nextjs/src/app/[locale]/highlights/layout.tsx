@@ -1,7 +1,7 @@
 import HeroHeader  from "@/components/ui/HeroHeader";
 import PageTabs    from "@/components/ui/PageTabs";
 import { getHighlightsPage, mediaURL, Locale } from "@/lib/strapi";
-import { shippori } from "@/styles/fonts";
+import { shippori } from '@/styles/fonts/fonts';
 import { cache } from "react";
 import React from "react";
 ;

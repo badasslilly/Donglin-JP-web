@@ -2,7 +2,7 @@
 
 import '@/styles/globals.css'          // すでに global で読み込んでいるなら不要
 import HeroHeader from '@/components/ui/HeroHeader'
-import { shippori } from '@/styles/fonts'
+import { shippori } from '@/styles/fonts/fonts'
 
 export default function EventsLayout({
   children,

@@ -1,11 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import localFont from 'next/font/local'
-
-const AiharahudemojikaishoFont = localFont({
-  src: '../../fonts/Aiharahudemojikaisho_free305.ttf',
-})
+import { aiharaKaisho } from '@/styles/fonts/fonts';
 
 interface SectionTitleProps {
   /** Japanese title shown vertically */
@@ -29,7 +25,7 @@ export default function SectionTitle({ jp, en, className }: SectionTitleProps) {
     <div className={clsx("flex items-center gap-3 md:gap-6", className)}>
       <h2
         className={clsx(
-          AiharahudemojikaishoFont.className,  // apply font directly to heading
+          aiharaKaisho.className,  // apply font directly to heading
           "text-3xl sm:text-4xl leading-none  md:text-5xl"
         )}
         style={{ writingMode: "vertical-rl", textOrientation: "upright" }}

@@ -1,7 +1,7 @@
 /** @format */
 // app/contact/page.tsx
 
-import { shippori } from '@/styles/fonts';
+import { shippori } from '@/styles/fonts/fonts';
 import HeroHeader from '@/components/ui/HeroHeader';
 import ContactPageClient from '@/components/ContactPageClient';
 import { getDictionary, isLocale, type Locale } from '@/i18n/get-dictionary';

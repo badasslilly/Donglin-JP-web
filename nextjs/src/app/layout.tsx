@@ -1,7 +1,7 @@
 // src/app/layout.tsx  (or src/app/[locale]/layout.tsx)
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
-import { shippori, hannariMinchoFont } from '@/styles/fonts';
+import { shippori, hannariMinchoFont } from '@/styles/fonts/fonts';
 
 export const metadata: Metadata = {
   title: '東林寺 / Donglin Monastery',
@@ -10,11 +10,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={`${shippori.variable} ${hannariMinchoFont.variable}`}>
-      <body className="antialiased font-sans">
-        {children}
-      </body>
-    </html>
+ 	<html 
+	  className={`${shippori.variable} ${hannariMinchoFont.variable}`}>
+  	  <body className="antialiased font-sans">{children}</body>
+	</html>
   );
 }
 

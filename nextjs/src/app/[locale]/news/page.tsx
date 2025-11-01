@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import HeroHeader from '@/components/ui/HeroHeader';
-import { shippori } from '@/styles/fonts';
+import { shippori } from '@/styles/fonts/fonts';
 import { getNewsList, Locale } from '@/lib/strapi';
 
 type PageProps = {

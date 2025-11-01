@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ja';
 import 'dayjs/locale/en';
-import { shippori } from '@/styles/fonts';
+import { shippori } from '@/styles/fonts/fonts';
 import { kindColor, kindLabel, badgeColor, tagLabel } from '@/data/kinds';
 import { getEventById, Locale } from '@/lib/strapi';
 import BlockRendererClient from '@/components/BlockRendererClient';

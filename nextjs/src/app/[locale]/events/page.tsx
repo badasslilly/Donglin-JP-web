@@ -1,6 +1,6 @@
 /** @format */
 
-import { shippori } from '@/styles/fonts';
+import { shippori } from '@/styles/fonts/fonts';
 import AnnualTimeline, { AnnualEvent } from '@/components/ui/AnnualTimeline';
 import MonthMenu from '@/components/ui/MonthMenu';
 import Legend from '@/components/ui/Legend';
