@@ -12,6 +12,9 @@ const nextConfig = {
      ],
     formats: ['image/avif', 'image/webp'],
   },
+  experimental: {
+    serverComponentsExternalPackages: ['pg', '@maxmind/geoip2-node'],
+  },
 };
 
 export default withNextIntl(nextConfig);

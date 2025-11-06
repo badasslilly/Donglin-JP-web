@@ -11,6 +11,7 @@ import type {Locale} from '@/lib/strapi';
 import {getNavWithChildren} from '@/lib/nav';
 import SiteNav from '@/components/SiteNav';
 import {Footer} from '@/components/Footer';
+import TrackOnRouteChange from '@/components/TrackOnRouteChange';
 
 // -----------------------------
 // Locale helpers
@@ -72,7 +73,8 @@ export default async function LocaleLayout({children, params}: LayoutProps) {
         socials={global.socials}
         mapLabel="アクセス地図を開く"
       />
-    </>
+    <TrackOnRouteChange />
+      </>
   );
 }
 
