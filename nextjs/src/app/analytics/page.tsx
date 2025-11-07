@@ -77,11 +77,11 @@ export default async function AnalyticsPage() {
 
   return (
     <main className="mx-auto max-w-7xl p-6 space-y-8">
-      <h1 className="text-2xl font-bold">アクセスログ（最新200件／リアルタイム）</h1>
+      <h1 className="text-2xl font-bold">Access Log（the lateset 200 items／real time）</h1>
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-2xl shadow">
-          <div className="text-sm text-gray-500">今日の合計</div>
+          <div className="text-sm text-gray-500">total today</div>
           <div className="mt-1 space-y-1">
             <div><span className="inline-block w-12 text-gray-600">PV</span> <span className="font-semibold">{fmt(totals.pv)}</span></div>
             <div><span className="inline-block w-12 text-gray-600">UV</span> <span className="font-semibold">{fmt(totals.uv)}</span></div>
@@ -89,11 +89,11 @@ export default async function AnalyticsPage() {
           </div>
         </div>
         <div className="p-4 rounded-2xl shadow">
-          <div className="text-sm text-gray-500">現在時刻</div>
+          <div className="text-sm text-gray-500">current time</div>
           <div className="text-lg font-semibold">{dayjs().format('YYYY-MM-DD HH:mm:ss')}</div>
         </div>
         <div className="p-4 rounded-2xl shadow">
-          <div className="text-sm text-gray-500">表示件数</div>
+          <div className="text-sm text-gray-500">number of items</div>
           <div className="text-lg font-semibold">{rows.length}</div>
         </div>
       </section>
