@@ -13,34 +13,27 @@ interface PageTabsProps {
   tabs: TabItem[];
   className?: string;
   bgClass?: string; // e.g., "bg-[#e6d6f1]"
+  letterSpacingEm?: number; // <— add this (same spacing for all labels)
 }
 
-/**
- * Horizontal tab navigation bar.
- * Usage:
- * ```tsx
- * <PageTabs tabs={[
- *   { href: '/about', label: '法然上人とお念仏' },
- *   { href: '/about/words', label: '法然上人のお言葉' },
- * ]}/>
- * ```
- */
 export default function PageTabs({
   tabs,
   className = "",
   bgClass = "bg-[#e7e2d0]",
+  letterSpacingEm = 0.2, 
 }: PageTabsProps) {
   const pathname = usePathname();
   return (
     <nav className={clsx(bgClass, className)}>
-      <ul className="mx-auto flex max-w-5xl items-center justify-center gap-6 px-4 py-4 text-sm font-semibold tracking-wide text-stone-950">
+      <ul className="mx-auto flex max-w-5xl items-center justify-center gap-6 px-4 py-4 text-sm font-semibold text-stone-950">
         {tabs.map((t, idx) => (
           <li key={t.href} className="flex items-center gap-6">
             <Link
               href={t.href}
+              style={{ letterSpacing: `${letterSpacingEm}em` }}  // <— uniform spacing here
               className={clsx(
                 pathname === t.href
-                  ? "text-stone-500 decoration-1"
+                  ? "text-stone-500"
                   : "hover:text-stone-500",
                 "transition-colors"
               )}

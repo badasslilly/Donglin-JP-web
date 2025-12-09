@@ -12,6 +12,12 @@ interface Social {
   platform: string
   url: string
 }
+
+interface Affiliate {
+  label: string
+  url: string
+}
+
 interface Props {
   locale: Locale
   opening: string
@@ -23,15 +29,22 @@ interface Props {
   mapLabel: string
   logoUrl: string | null
   socials: Social[]
+  affiliates?: Affiliate[]
 }
 
 export function Footer(data: Props) {
   const rawLogo = (data.logoUrl ?? '').trim()
   const logoSrc = rawLogo.length > 0 ? rawLogo : null
+
+  const affiliateLabel =
+    data.locale === 'ja' ? '提携リンク' : 'Affiliate Links'
+
   return (
     <footer className={`bg-[#f5f5f3] py-20 text-black ${shippori.className}`}>
       <div className='mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-3 lg:gap-20'>
+        {/* LEFT / MAIN BLOCK */}
         <div className='lg:col-span-2 space-y-10'>
+          {/* Opening & Inquiry */}
           <div>
             <p className='text-xl font-semibold tracking-wide'>
               {data.opening}
@@ -41,6 +54,7 @@ export function Footer(data: Props) {
             </p>
           </div>
 
+          {/* TEL / MAIL */}
           <div className='space-y-2 text-sm lg:text-base'>
             <p>
               <span className='inline-block w-16'>TEL</span>
@@ -53,6 +67,8 @@ export function Footer(data: Props) {
               </a>
             </p>
           </div>
+
+          {/* SNS ICONS */}
           <div className='flex items-center gap-6 pt-6'>
             {data.socials.map(({ platform, url }) => {
               /* Normalise platform name */
@@ -89,9 +105,33 @@ export function Footer(data: Props) {
             })}
           </div>
 
+          {/* 🔗 AFFILIATE LINKS BLOCK */}
+          {data.affiliates?.length ? (
+            <div className='mt-6 border-t border-black/20 pt-3'>
+              <p className='mb-2 text-xs font-semibold tracking-wide'>
+                {affiliateLabel}
+              </p>
+              <div className='flex flex-wrap items-center gap-3 text-xs lg:text-sm'>
+                {data.affiliates.map(({ label, url }) => (
+                  <Link
+                    key={url}
+                    href={url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='underline underline-offset-4 hover:opacity-50'
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {/* COPYRIGHT */}
           <p className='pt-12 text-xs'>{data.copyright}</p>
         </div>
 
+        {/* RIGHT / MAP + LOGO + ADDRESS (DESKTOP ONLY) */}
         <div className='hidden lg:grid grid-cols-3 items-start gap-4'>
           <Link
             href='https://maps.google.com/?q=29.4842,115.9966'
@@ -107,7 +147,7 @@ export function Footer(data: Props) {
           </Link>
 
           <div className='flex justify-center'>
-          {logoSrc && (
+            {logoSrc && (
               <Image
                 src={logoSrc}
                 alt='東林寺'
