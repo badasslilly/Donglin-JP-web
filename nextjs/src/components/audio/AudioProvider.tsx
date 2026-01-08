@@ -17,7 +17,7 @@ const STORAGE_KEY_PLAYING = 'dl_audio_playing'
 const STORAGE_KEY_VOLUME = 'dl_audio_volume'
 
 // ✅ 只在首次播放时跳过开头静音
-const INTRO_SKIP_SECONDS = 10
+const INTRO_SKIP_SECONDS = 7
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -82,7 +82,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     } catch {}
 
     const t = setTimeout(() => {
-      // ✅ 这里走统一 play()，保证“首次播放跳过10秒”的逻辑也生效
+      // ✅ 这里走统一 play()，保证“首次播放跳过7秒”的逻辑也生效
       play().catch(() => {
         setIsPlaying(false)
         try {
