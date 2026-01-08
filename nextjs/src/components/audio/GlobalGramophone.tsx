@@ -8,7 +8,7 @@ export default function GlobalGramophone() {
   const { isPlaying, toggle } = useAudio()
 
   return (
-    <div className='fixed bottom-6 right-6 z-[9999] pointer-events-auto'>
+    <div className='fixed bottom-12 right-6 z-[9999] pointer-events-auto'>
       <button
         type='button'
         onClick={() => toggle()}
@@ -108,15 +108,13 @@ export default function GlobalGramophone() {
 
               {/* 阴影（同步短杆） */}
               <path
-                d='M 106 28 L 76 74'
+                d='M 106 28 L 75 74'
                 stroke='rgba(0,0,0,0.18)'
                 strokeWidth='7'
                 strokeLinecap='round'
               />
-
               {/* 唱头（灰色小块）——更小更贴图 */}
-              <g transform='translate(66 75) rotate(-32)'>
-
+              <g transform='translate(65 76) rotate(-22)'>
                 <rect
                   x='0'
                   y='-4'
@@ -139,10 +137,8 @@ export default function GlobalGramophone() {
             </svg>
           </div>
         </div>
-
         {/* Hover：轻微抬起，增强“可点” */}
         <div className='absolute inset-0 rounded-[26px] transition-transform duration-150 group-hover:-translate-y-[1px] group-active:translate-y-[0px]' />
-
         {/* 动画（仅 CSS，性能稳） */}
         <style jsx>{`
           .dl-vinyl-spin {
@@ -158,14 +154,16 @@ export default function GlobalGramophone() {
             }
           }
 
-          /* 外层负责位置（点击时的移动动画） */
+          /* 播放中：落针（顺时针，朝唱片） */
           .dl-arm-on {
-            transform: rotate(18deg);
+            transform: rotate(1deg);
             transition: transform 320ms cubic-bezier(0.2, 0.9, 0.2, 1);
             will-change: transform;
           }
+
+          /* 默认：停靠（逆时针，离开唱片，往右上） */
           .dl-arm-off {
-            transform: rotate(-8deg);
+            transform: rotate(-42deg); /* ✅ 关键：负号 */
             transition: transform 320ms cubic-bezier(0.2, 0.9, 0.2, 1);
             will-change: transform;
           }

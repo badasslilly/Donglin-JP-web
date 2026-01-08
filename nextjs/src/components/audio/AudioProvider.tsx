@@ -2,146 +2,132 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
-export type Track = {
-  id: string
-  title: string
-  artist?: string
-  src: string
-  cover?: string
-}
-
 type AudioCtx = {
-  track: Track
-  setTrack: (t: Track) => void
   isPlaying: boolean
-  toggle: () => Promise<void>
-  pause: () => void
+  toggle: () => void
   play: () => Promise<void>
-  currentTime: number
-  duration: number
-  seek: (t: number) => void
-  volume: number
+  pause: () => void
   setVolume: (v: number) => void
+  volume: number
 }
 
 const Ctx = createContext<AudioCtx | null>(null)
 
-const DEFAULT_TRACK: Track = {
-  id: 'nenbutsu',
-  title: '念佛',
-  artist: '東林寺',
-  src: '/audio/nenbutsu.mp3',
-}
+const STORAGE_KEY_PLAYING = 'dl_audio_playing'
+const STORAGE_KEY_VOLUME = 'dl_audio_volume'
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  const [track, setTrack] = useState<Track>(DEFAULT_TRACK)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [volume, setVolumeState] = useState(0.8)
+  const [volume, setVolumeState] = useState(0.6)
 
-  // init audio once
+  // 读取上次音量/播放状态（只在客户端）
   useEffect(() => {
-    if (audioRef.current) return
-    const a = new Audio()
-    a.preload = 'none' // 性能关键：不要首屏就拉音频
-    a.src = track.src
-    a.volume = volume
-    a.crossOrigin = 'anonymous'
-    audioRef.current = a
+    try {
+      const v = localStorage.getItem(STORAGE_KEY_VOLUME)
+      if (v) setVolumeState(Math.min(1, Math.max(0, Number(v))))
+      const p = localStorage.getItem(STORAGE_KEY_PLAYING)
+      if (p === '1') setIsPlaying(true)
+    } catch {}
+  }, [])
+
+  // 初始化 audio（只创建一次）
+  useEffect(() => {
+    const el = new Audio('/audio/东林佛号欣赏版 - 宗铄法师.mp3')
+    el.preload = 'none'          // 性能：不抢首屏
+    el.loop = true
+    el.volume = volume
+    el.crossOrigin = 'anonymous'
+    audioRef.current = el
 
     const onPlay = () => setIsPlaying(true)
     const onPause = () => setIsPlaying(false)
-    const onTime = () => setCurrentTime(a.currentTime || 0)
-    const onLoaded = () => setDuration(a.duration || 0)
-    const onEnded = () => setIsPlaying(false)
 
-    a.addEventListener('play', onPlay)
-    a.addEventListener('pause', onPause)
-    a.addEventListener('timeupdate', onTime)
-    a.addEventListener('loadedmetadata', onLoaded)
-    a.addEventListener('ended', onEnded)
+    el.addEventListener('play', onPlay)
+    el.addEventListener('pause', onPause)
 
     return () => {
-      a.pause()
-      a.removeEventListener('play', onPlay)
-      a.removeEventListener('pause', onPause)
-      a.removeEventListener('timeupdate', onTime)
-      a.removeEventListener('loadedmetadata', onLoaded)
-      a.removeEventListener('ended', onEnded)
+      el.removeEventListener('play', onPlay)
+      el.removeEventListener('pause', onPause)
+      el.pause()
+      audioRef.current = null
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // when track changes: keep single audio, swap src
+  // 同步音量到 audio + localStorage
   useEffect(() => {
-    const a = audioRef.current
-    if (!a) return
-    const wasPlaying = !a.paused
-    a.pause()
-    a.src = track.src
-    a.load()
-    setCurrentTime(0)
-    setDuration(0)
-    if (wasPlaying) {
-      // 需要用户手势的浏览器：这里可能会被拦截，但 toggle/play 会由按钮触发，通常没问题
-      a.play().catch(() => {})
-    }
-  }, [track.src])
-
-  useEffect(() => {
-    const a = audioRef.current
-    if (!a) return
-    a.volume = volume
+    const el = audioRef.current
+    if (el) el.volume = volume
+    try {
+      localStorage.setItem(STORAGE_KEY_VOLUME, String(volume))
+    } catch {}
   }, [volume])
 
-  const api = useMemo<AudioCtx>(() => {
-    async function play() {
-      const a = audioRef.current
-      if (!a) return
-      // 触发播放前再决定 preload：允许更快起播
-      if (a.preload !== 'auto') a.preload = 'auto'
-      await a.play()
+  // 如果用户上次是“播放”，页面载入后尝试自动播放（可能被浏览器拦）
+  useEffect(() => {
+    if (!isPlaying) {
+      try {
+        localStorage.setItem(STORAGE_KEY_PLAYING, '0')
+      } catch {}
+      return
     }
-    function pause() {
-      audioRef.current?.pause()
-    }
-    async function toggle() {
-      const a = audioRef.current
-      if (!a) return
-      if (a.paused) await play()
-      else pause()
-    }
-    function seek(t: number) {
-      const a = audioRef.current
-      if (!a) return
-      a.currentTime = Math.max(0, Math.min(t, a.duration || t))
-    }
-    function setVolume(v: number) {
-      setVolumeState(Math.max(0, Math.min(1, v)))
-    }
+    try {
+      localStorage.setItem(STORAGE_KEY_PLAYING, '1')
+    } catch {}
+    // 不强行立刻播放，避免首屏干扰；等一下再试
+    const t = setTimeout(() => {
+      audioRef.current?.play().catch(() => {
+        // 被自动播放策略拦截时，不报错；等用户点击 UI 再播放
+        setIsPlaying(false)
+        try {
+          localStorage.setItem(STORAGE_KEY_PLAYING, '0')
+        } catch {}
+      })
+    }, 250)
+    return () => clearTimeout(t)
+  }, [isPlaying])
 
-    return {
-      track,
-      setTrack,
-      isPlaying,
-      toggle,
-      pause,
-      play,
-      currentTime,
-      duration,
-      seek,
-      volume,
-      setVolume,
-    }
-  }, [track, isPlaying, currentTime, duration, volume])
+  async function play() {
+    const el = audioRef.current
+    if (!el) return
+    await el.play()
+    setIsPlaying(true)
+    try {
+      localStorage.setItem(STORAGE_KEY_PLAYING, '1')
+    } catch {}
+  }
 
-  return <Ctx.Provider value={api}>{children}</Ctx.Provider>
+  function pause() {
+    const el = audioRef.current
+    if (!el) return
+    el.pause()
+    setIsPlaying(false)
+    try {
+      localStorage.setItem(STORAGE_KEY_PLAYING, '0')
+    } catch {}
+  }
+
+  function toggle() {
+    if (isPlaying) pause()
+    else play().catch(() => {})
+  }
+
+  function setVolume(v: number) {
+    setVolumeState(Math.min(1, Math.max(0, v)))
+  }
+
+  const value = useMemo<AudioCtx>(
+    () => ({ isPlaying, toggle, play, pause, volume, setVolume }),
+    [isPlaying, volume]
+  )
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 
 export function useAudio() {
-  const v = useContext(Ctx)
-  if (!v) throw new Error('useAudio must be used within AudioProvider')
-  return v
+  const ctx = useContext(Ctx)
+  if (!ctx) throw new Error('useAudio must be used inside <AudioProvider>')
+  return ctx
 }
