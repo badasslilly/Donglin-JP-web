@@ -16,8 +16,12 @@ const Ctx = createContext<AudioCtx | null>(null)
 const STORAGE_KEY_PLAYING = 'dl_audio_playing'
 const STORAGE_KEY_VOLUME = 'dl_audio_volume'
 
+// ✅ 只在首次播放时跳过开头静音
+const INTRO_SKIP_SECONDS = 10
+
 export function AudioProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const hasAutoSeekedRef = useRef(false) // ✅ 只跳一次
 
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolumeState] = useState(0.6)
@@ -35,7 +39,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   // 初始化 audio（只创建一次）
   useEffect(() => {
     const el = new Audio('/audio/东林佛号欣赏版 - 宗铄法师.mp3')
-    el.preload = 'none'          // 性能：不抢首屏
+    el.preload = 'none' // 性能：不抢首屏
     el.loop = true
     el.volume = volume
     el.crossOrigin = 'anonymous'
@@ -76,22 +80,69 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem(STORAGE_KEY_PLAYING, '1')
     } catch {}
-    // 不强行立刻播放，避免首屏干扰；等一下再试
+
     const t = setTimeout(() => {
-      audioRef.current?.play().catch(() => {
-        // 被自动播放策略拦截时，不报错；等用户点击 UI 再播放
+      // ✅ 这里走统一 play()，保证“首次播放跳过10秒”的逻辑也生效
+      play().catch(() => {
         setIsPlaying(false)
         try {
           localStorage.setItem(STORAGE_KEY_PLAYING, '0')
         } catch {}
       })
     }, 250)
+
     return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying])
+
+  async function ensureMetadata(el: HTMLAudioElement) {
+    // readyState: 0 = HAVE_NOTHING, 1 = HAVE_METADATA
+    if (el.readyState >= 1) return
+
+    await new Promise<void>((resolve) => {
+      const onMeta = () => {
+        el.removeEventListener('loadedmetadata', onMeta)
+        resolve()
+      }
+      el.addEventListener('loadedmetadata', onMeta)
+
+      // 保险：如果此刻刚好已经有了
+      if (el.readyState >= 1) {
+        el.removeEventListener('loadedmetadata', onMeta)
+        resolve()
+      } else {
+        // 触发加载（preload=none 时可能需要）
+        try {
+          el.load()
+        } catch {}
+      }
+    })
+  }
 
   async function play() {
     const el = audioRef.current
     if (!el) return
+
+    // ✅ 首次播放才跳过静音
+    if (!hasAutoSeekedRef.current) {
+      try {
+        await ensureMetadata(el)
+        const target = INTRO_SKIP_SECONDS
+
+        // 太短的音频别跳（避免异常）
+        if (Number.isFinite(el.duration) && el.duration > target + 1) {
+          // 如果用户已经手动拖到更后面了，就不要强行拉回到 10s
+          if (el.currentTime < target) {
+            el.currentTime = target
+          }
+        }
+      } catch {
+        // ignore
+      } finally {
+        hasAutoSeekedRef.current = true
+      }
+    }
+
     await el.play()
     setIsPlaying(true)
     try {
