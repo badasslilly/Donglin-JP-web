@@ -8,7 +8,7 @@ export default function GlobalGramophone() {
   const { isPlaying, toggle } = useAudio()
 
   return (
-    <div className='fixed bottom-12 right-6 z-[9999] pointer-events-auto'>
+    <div className='fixed bottom-3 md:bottom-12 right-6 z-[9999] pointer-events-auto'>
       <button
         type='button'
         onClick={() => toggle()}
