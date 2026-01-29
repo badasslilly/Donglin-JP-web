@@ -192,52 +192,92 @@ export async function getHomePage(locale: Locale): Promise<HomePageRaw | null> {
   });
 }
 
-/* ----------  About Page types -------------------------------------- */
-export interface HistoryItem {
-  era?: string | null;
-  brief?: string | null;
-}
-export interface HistorySection {
-  section_name?: string | null;
-  content?: HistoryItem[];
-}
-export interface AboutPageData {
-  header?: {
-    heading?: { title_ja?: string; title_en?: string } | null;
-    bg_image?: { url: string } | null;
-  };
-  tab_bar?:  { label: string; href: string; order?: number | null }[];
-  content?:  {
-    headline?: string | null;
-    intro?: unknown;
-    image?: { url: string } | null;
-  }[];
-  page_title?: string | null;
-  intro_text?: string | null;
-  history_section?: HistorySection[];
+/* ---------- About Page types -------------------------------------- */
+export interface AboutVideoBlock {
+  title?: string | null
+  description?: string | null
+  videoUrl?: string | null
+  // optional future field if you add it later
+  posterUrl?: { url: string } | null
 }
 
-// Content updates less frequently: 15 min
+export interface HistoryItem {
+  era?: string | null
+  brief?: string | null
+}
+export interface HistorySection {
+  section_name?: string | null
+  content?: HistoryItem[]
+}
+
+export interface AboutPageData {
+  header?: {
+    heading?: { title_ja?: string | null; title_en?: string | null } | null
+    bg_image?: { url: string } | null
+  } | null
+
+  tab_bar?: { label: string; href: string; order?: number | null }[] | null
+
+  page_title?: string | null
+  intro_text?: string | null
+
+  content?: {
+    headline?: string | null
+    intro?: unknown
+    image?: { url: string } | null
+  }[] | null
+
+  history_section?: HistorySection[] | null
+
+  // ✅ correct field name
+  video_block?: AboutVideoBlock | null
+}
+
 export async function getAboutPage(locale: Locale): Promise<AboutPageData> {
   const q = qs.stringify(
     {
       locale,
-      fields: ["page_title", "intro_text"],
+      fields: ['page_title', 'intro_text'],
       populate: {
-        header:  { populate: ["bg_image", "heading"] },
+        header: { populate: ['bg_image', 'heading'] },
         tab_bar: true,
-        content: { populate: ["image"] },
+        content: { populate: ['image'] },
         history_section: { populate: { content: true } },
+
+        // ✅ component (no posterUrl in your current schema)
+        video_block: { populate: '*' },
       },
     },
     { encodeValuesOnly: true },
-  );
+  )
 
   return strapiFetch<AboutPageData>(`/api/about-page?${q}`, {
     revalidate: 900,
-    tags: ["about", `about:${locale}`],
-  });
+    tags: ['about', `about:${locale}`],
+  })
 }
+
+/* ------------------------------------------------------------------ */
+/* About shell (memoized)                                             */
+/* ------------------------------------------------------------------ */
+export const getAboutShell = cache(async (locale: Locale) => {
+  const page = await getAboutPage(locale)
+  const vb = page.video_block ?? null
+
+  return {
+    page,
+    video: vb
+      ? {
+          title: vb.title ?? '',
+          description: vb.description ?? '',
+          videoUrl: vb.videoUrl ?? '',
+          // no poster in your JSON; keep empty string for VideoBlock poster
+          posterUrl: vb.posterUrl?.url ? mediaURL(vb.posterUrl.url) : '',
+        }
+      : null,
+  }
+})
+
 
 /* ------------------------------------------------------------------ */
 /*  Highlights Page (single type)                                     */

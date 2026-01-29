@@ -2,24 +2,19 @@
 import SectionHeading from '@/components/ui/SectionHeading'
 import Table, { HistoryGroup } from '@/components/ui/Table'
 import VerticalBookmark from '@/components/ui/VerticalBookmark'
-import { getAboutPage, mediaURL, Locale } from '@/lib/strapi'
+import VideoBlock from '@/components/ui/VideoBlock'
+import { getAboutShell, mediaURL, Locale } from '@/lib/strapi'
 
 import Image from 'next/image'
 import clsx from 'clsx'
 
-
 // Added by fix-async-props codemod
 type PageProps = {
-  params: Promise<{ slug: string; locale: 'ja' | 'en' }>; // adjust keys as needed
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  params: Promise<{ locale: 'ja' | 'en' }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-
 /* ---------- helpers ------------------------------------------------ */
-const hrefFor = (loc: Locale, p: string) =>
-  p.startsWith('/') ? `/${loc}${p}`.replace('//', '/') : p
-
-/** very small renderer – paragraph + text  */
 function renderBlocks(blocks: any[]) {
   return blocks.map((n, i) =>
     n.type === 'paragraph' ? (
@@ -34,28 +29,22 @@ function renderBlocks(blocks: any[]) {
 
 /* ---------- page component ---------------------------------------- */
 export default async function AboutPage(props: PageProps) {
-  // Next 15 async request props shim (added by codemod)
-  const params = await props.params;
-  const searchParams = props.searchParams ? await props.searchParams : undefined;
-
-  /* 1. await params (Next 15) */
-  const { locale } = await params
+  const params = await props.params
+  const locale: Locale = params.locale
   const isEN = String(locale).startsWith('en')
 
-  /* 2. fetch everything */
-  const data = await getAboutPage(locale)
-  const groups: HistoryGroup[] = (data.history_section ?? []).map(
-    (sec: any) => ({
-      title: sec.section_name ?? '',
-      rows: (sec.content ?? []).map((it: any) => ({
-        period: it.era ?? '',
-        name: '', // schema has no person
-        notes: it.brief ?? '',
-      })),
-    }),
-  )
+  // ✅ use a shell to get both page content + optional video
+  const { page: data, video } = await getAboutShell(locale)
 
-  /* 3. render -------------------------------------------------------------- */
+  const groups: HistoryGroup[] = (data.history_section ?? []).map((sec: any) => ({
+    title: sec.section_name ?? '',
+    rows: (sec.content ?? []).map((it: any) => ({
+      period: it.era ?? '',
+      name: '',
+      notes: it.brief ?? '',
+    })),
+  }))
+
   return (
     <main className="min-h-screen bg-white text-gray-900">
       <section className="px-4 pb-10 text-[#2d261f]">
@@ -68,21 +57,33 @@ export default async function AboutPage(props: PageProps) {
             </h2>
           </div>
 
-          {/* ───── Paragraphs ───── */}
+          {/* ───── Intro ───── */}
           <div className="space-y-6 leading-relaxed text-[1rem] sm:text-lg">
             <p>{data.intro_text}</p>
           </div>
         </div>
       </section>
 
+      {/* ✅ Video block (same style as highlights) */}
+      {video && (
+        <section className="mx-auto max-w-5xl px-4 pb-10">
+          <VideoBlock
+            title={video.title}
+            description={video.description}
+            videoUrl={video.videoUrl}
+            posterUrl={video.posterUrl}
+            locale={locale}
+          />
+        </section>
+      )}
+
       {/* content blocks */}
       <article className="mx-auto max-w-5xl space-y-14 px-4 pb-14">
         {(data.content ?? []).map((b: any, i: number) => {
           const bookmarkSide = i % 2 === 0 ? 'left' : 'right'
           const imgSide = bookmarkSide === 'left' ? 'right' : 'left'
-          const headlineSide = imgSide === 'left' ? 'right' : 'left' // EN badge on opposite side
+          const headlineSide = imgSide === 'left' ? 'right' : 'left'
 
-          /* indent body away from the floating image */
           const bodyPad = b.image?.url
             ? imgSide === 'left'
               ? 'md:pl-56 sm:pr-20'
@@ -94,18 +95,12 @@ export default async function AboutPage(props: PageProps) {
               key={i}
               className="relative isolate mt-14 rounded-lg border border-[#e5e2d3] bg-[#f6f3e7]/60 p-5 md:p-6 lg:p-12"
             >
-              {/* JA: vertical bookmark ribbon; EN: hidden (we overlay a badge) */}
-              {b.headline && !isEN && (
+              {!isEN && b.headline && (
                 <div className="hidden sm:block">
-                  <VerticalBookmark
-                    text={b.headline}
-                    align={bookmarkSide}
-                    locale={locale}
-                  />
+                  <VerticalBookmark text={b.headline} align={bookmarkSide} locale={locale} />
                 </div>
               )}
 
-              {/* EN: headline badge on the OPPOSITE side of the image (above it) */}
               {isEN && b.headline && (
                 <div
                   className={clsx(
@@ -119,7 +114,6 @@ export default async function AboutPage(props: PageProps) {
                 </div>
               )}
 
-              {/* illustration (desktop) */}
               {b.image?.url && (
                 <Image
                   src={mediaURL(b.image.url)}
@@ -133,7 +127,6 @@ export default async function AboutPage(props: PageProps) {
                 />
               )}
 
-              {/* mobile heading & image */}
               <div className="mb-4 sm:hidden">
                 {b.headline && (
                   <h2 className="mb-3 text-xl font-bold tracking-widest text-[#8c3b16]">
@@ -151,7 +144,6 @@ export default async function AboutPage(props: PageProps) {
                 )}
               </div>
 
-              {/* body */}
               <div className={bodyPad}>
                 {b.headline && <h2 className="sr-only">{b.headline}</h2>}
                 {typeof b.intro === 'string' ? (
@@ -167,14 +159,9 @@ export default async function AboutPage(props: PageProps) {
         })}
       </article>
 
-      {/* ─────────── history sections ─────────── */}
       {groups.length > 0 && (
         <section className="mx-auto max-w-5xl px-4">
-          <SectionHeading
-            title={
-              isEN ? 'The History of Donglin Monastery' : '東林寺寺史'
-            }
-          />
+          <SectionHeading title={isEN ? 'The History of Donglin Monastery' : '東林寺寺史'} />
           <Table groups={groups} locale={locale} />
         </section>
       )}
