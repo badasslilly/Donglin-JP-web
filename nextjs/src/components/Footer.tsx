@@ -26,7 +26,6 @@ interface Props {
   email: string
   address: string
   copyright: string
-  mapLabel: string
   logoUrl: string | null
   socials: Social[]
   affiliates?: Affiliate[]
@@ -131,21 +130,8 @@ export function Footer(data: Props) {
           <p className='pt-12 text-xs'>{data.copyright}</p>
         </div>
 
-        {/* RIGHT / MAP + LOGO + ADDRESS (DESKTOP ONLY) */}
-        <div className='hidden lg:grid grid-cols-3 items-start gap-4'>
-          <Link
-            href='https://maps.google.com/?q=29.4842,115.9966'
-            target='_blank'
-            className='flex flex-col items-center gap-2 hover:opacity-70'
-          >
-            <svg viewBox='0 0 24 24' className='h-6 w-6 fill-current rotate-90'>
-              <path d='M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z' />
-            </svg>
-            <span className='[writing-mode:vertical-rl] text-sm tracking-widest'>
-              {data.mapLabel}
-            </span>
-          </Link>
-
+        {/* RIGHT / LOGO + ADDRESS (DESKTOP ONLY) */}
+        <div className='hidden lg:grid grid-cols-2 items-start gap-4'>
           <div className='flex justify-center'>
             {logoSrc && (
               <Image

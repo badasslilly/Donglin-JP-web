@@ -83,7 +83,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         copyright={global.copyright}
         logoUrl={footerLogoUrl}
         socials={global.socials}
-        mapLabel='アクセス地図を開く'
         affiliates={[
           { label: '庐山东林寺', url: 'https://www.lsdls.cn/' },
           { label: 'DONGLIN MONASTERY', url: 'https://www.donglin.org/' },
