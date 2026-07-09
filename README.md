@@ -1,42 +1,95 @@
-# 🏯 Donglin Temple JP Website
+# Donglin JP Website
 
-A multilingual website introducing **Donglin Temple (東林寺)** and **Chinese Pure Land Buddhism (浄土教)** to Japanese audiences. The website provides access to cultural, historical, and spiritual content in a Japanese-first experience, promoting understanding of Donglin's heritage and its connection to Japan.
+Official multilingual website for Donglin Monastery's Japanese-facing presence.
 
-## 🌐 Website Sections
+Website: [https://jp.donglin.org](https://jp.donglin.org)
 
-- **年間行事・活動体験談**  
-  四季ごとの仏教イベント、修行体験、法会の紹介
+![Donglin JP website preview](docs/preview.gif)
 
-- **授与品~のご案内**  
-  御朱印帳・お守り・仏教文創グッズの交換情報や写真一覧
+## Overview
 
-- **歴史・建築・祖師・日本との関係**  
-  東林寺の沿革、建築美、祖師（慧遠大師）紹介、日本仏教との交流史
+This repository contains a two-part web application:
 
-- **観光案内・名勝古跡・展示会**  
-  東林寺周辺の観光地、仏教文化展、寺内マップなど
+- `nextjs/` - public website built with Next.js, React, TypeScript, Tailwind CSS, and next-intl.
+- `strapi/` - Strapi CMS used to manage pages, navigation, news, events, offerings, people, media, and site-wide content.
 
-- **お問い合わせ**  
-  日本語でのお問い合わせフォームとアクセス情報
+The production deployment runs the frontend and backend as separate PM2 processes behind a reverse proxy.
 
----
+## Main Sections
 
-## 🛠️ Tech Stack
+- Annual events and visitor experiences
+- Offering item information
+- Temple history, architecture, patriarchs, and Japan-related content
+- Highlights, scenic spots, exhibitions, and cultural pages
+- News and contact pages
 
-| Layer      | Technology             |
-|------------|------------------------|
-| Frontend   | [Next.js](https://nextjs.org/) |
-| Styling    | [Tailwind CSS](https://tailwindcss.com/) |
-| CMS (opt.) | [Strapi](https://strapi.io/) or [Sanity](https://www.sanity.io/) |
-| Hosting    | [Vercel](https://vercel.com/) |
-| Optional   | Buddhist AI chatbot (RAG/LLM API) |
+## Tech Stack
 
----
+| Layer | Technology |
+| --- | --- |
+| Frontend | Next.js 14, React 18, TypeScript |
+| Styling | Tailwind CSS |
+| Internationalization | next-intl |
+| CMS | Strapi 5 |
+| Runtime | Node.js |
+| Process manager | PM2 |
+| Database | Configurable through Strapi, commonly PostgreSQL in production |
 
-## 🚀 Getting Started
+## Repository Structure
 
-### 1. Clone the Repository
+```text
+.
+├── nextjs/                  # Frontend application
+│   ├── src/app/             # App Router pages and API routes
+│   ├── src/components/      # UI and page components
+│   ├── src/i18n/            # Locale routing and dictionaries
+│   ├── src/lib/             # Strapi client and shared utilities
+│   └── public/              # Static assets
+├── strapi/                  # Strapi CMS application
+│   ├── config/              # Server, database, middleware, plugin config
+│   ├── src/api/             # Content types, controllers, routes, services
+│   └── public/uploads/      # Runtime uploads, ignored except .gitkeep
+├── docs/
+│   ├── preview.gif          # Public website preview for README
+│   └── preview.jpg          # Static fallback screenshot
+└── DEPLOYMENT.example.md    # Public deployment example
+```
+
+## Local Development
+
+Frontend:
 
 ```bash
-git clone https://github.com/your-username/donglin-temple-jp.git
-cd donglin-temple-jp
+cd nextjs
+npm install
+npm run dev
+```
+
+Strapi:
+
+```bash
+cd strapi
+npm install
+npm run develop
+```
+
+Create local environment files from your deployment or from example values before running the applications:
+
+- `nextjs/.env.local`
+- `strapi/.env`
+
+Do not commit real environment files, database dumps, private keys, API tokens, or production upload archives.
+
+## Deployment
+
+See [DEPLOYMENT.example.md](DEPLOYMENT.example.md) for a public-safe PM2 deployment example.
+
+The private handoff document with production-specific values, account notes, and operational details should be shared outside the public repository.
+
+## Security Notes
+
+- Keep Strapi API tokens read-only unless write access is explicitly needed.
+- Protect operational dashboards such as analytics pages with application auth, reverse-proxy auth, or a private network rule.
+- Add rate limiting or bot protection to public write endpoints.
+- Store secrets in server environment variables, not in Git.
+- Review media, fonts, and audio licensing before redistributing assets publicly.

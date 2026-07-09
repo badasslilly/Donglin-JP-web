@@ -27,23 +27,18 @@ export default [
        */
       origin: [
         'http://localhost:3000',
-        /^https?:\/\/.*\.vercel\.app$/,
-        env('FRONTEND_URL', 'https://your-domain.com'),
+        'http://127.0.0.1:3000',
+        'https://jp.donglin.org',         // (same-origin calls if any)
+        // add other dev hosts if you use them
       ],
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-      headers: [
-        'Content-Type',
-        'Authorization',
-        'Origin',
-        'Accept',
-        'Accept-Language',
-      ],
-      credentials: true,
+      headers: '*',
+      methods: '*',
+      credentials: true,                  // set false if you don't use cookies/auth
     },
   },
-
-  /* --- the rest of the default stack --- */
+  'strapi::security',
   'strapi::poweredBy',
+  'strapi::logger',
   'strapi::query',
   'strapi::body',
   'strapi::session',
