@@ -4,11 +4,7 @@ Official multilingual website for Donglin Monastery's Japanese-facing presence.
 
 Website: [https://jp.donglin.org](https://jp.donglin.org)
 
-<img
-  src="https://raw.githubusercontent.com/badasslilly/Donglin-JP-web/main/docs/preview.gif"
-  alt="Donglin JP website preview"
-  width="760"
-/>
+[![Donglin JP website preview](./docs/preview.jpg?raw=true)](./docs/preview.gif?raw=true)
 
 ## Overview
 
