@@ -60,6 +60,8 @@ export default async function LocaleHome(props: PageProps) {
     ) ?? { title_ja: '新着情報', title_en: 'News' };
 
   const heroVideo = resolveMediaUrl(home?.home_video);
+  const heroSrc = heroVideo || HERO_HLS;
+  const aboutImage = resolveMediaUrl(aboutIntro?.image) || '/imgs/map-of-Lushan.png';
   const t = (jp: string, en: string) => (locale === 'ja' ? jp : en);
   const aboutHref = localeHref(aboutBtn?.url ?? '/about', locale);
 
@@ -77,7 +79,7 @@ export default async function LocaleHome(props: PageProps) {
   <div className="absolute inset-0 z-0 bg-black/50">
     <BorderWrapper className="h-full w-full">
       <HeroVideoHLS
-        src={HERO_HLS}                 // e.g. "/videos/hero/master.m3u8"
+        src={heroSrc}                  // Strapi locale media first, static fallback second
         poster={HERO_POSTER}           // e.g. "/videos/home-hero-poster.jpg"
         heightClasses="h-full"         // fill the frame height
         className="w-full"             // fill width
@@ -100,7 +102,7 @@ export default async function LocaleHome(props: PageProps) {
 
           <div className="flex flex-col gap-10 lg:flex-row lg:gap-14 items-center">
             <Image
-              src="/imgs/map-of-Lushan.png"
+              src={aboutImage}
               alt="Map showing Donglin Temple location"
               width={300}
               height={340}
@@ -130,4 +132,3 @@ export default async function LocaleHome(props: PageProps) {
     </main>
   );
 }
-
